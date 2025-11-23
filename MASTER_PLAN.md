@@ -397,15 +397,21 @@ perfOptions = new PDWebGpuPerformanceDisplayOptions
 - [x] Add configurable camera properties (FOV, speed, sensitivity, bounds)
 - [x] Add comprehensive camera tests (26 new tests, all passing)
 
-### Phase 9: Performance Metrics
-- [ ] Create PDWebGpuPerformanceDisplayOptions
-- [ ] Implement PDWebGpuPerformanceDisplay component
-- [ ] Add FPS calculation
-- [ ] Add frame time measurement
-- [ ] Add frame time usage % for fixed intervals
-- [ ] Add draw call counter
-- [ ] Add triangle count tracking
-- [ ] Support custom user metrics
+### Phase 9: Performance Metrics ✓
+- [x] Create PDWebGpuPerformanceDisplayOptions with configuration properties
+- [x] Create CornerPosition enum for overlay positioning
+- [x] Implement PerformanceMetrics class for metric tracking and calculation
+- [x] Implement PDWebGpuPerformanceDisplay component with overlay UI
+- [x] Add FPS calculation with rolling average
+- [x] Add frame time measurement in milliseconds
+- [x] Add frame time usage % for fixed frame rate intervals
+- [x] Add draw call counter support
+- [x] Add triangle count tracking support
+- [x] Support custom user-defined metrics via dictionary
+- [x] Add periodic UI refresh with configurable interval
+- [x] Add color-coded warnings (green/yellow/red for frame usage)
+- [x] Add number formatting for large values (K/M suffixes)
+- [x] Add comprehensive performance tests (21 new tests, all passing)
 
 ### Phase 10: Error Handling & Diagnostics
 - [ ] Implement PDWebGpuDeviceException
@@ -661,3 +667,4 @@ When you discover important patterns, conventions, or decisions during developme
 | 1.8.0   | 2025-01-23 | Phase 6 completed: Enhanced render loop system with page visibility API integration, IVisibilityCallback interface for visibility change notifications, PauseWhenInactive functionality with automatic pause/resume based on tab visibility, manual pause/resume methods (PauseRenderLoop, ResumeRenderLoop), render loop status properties (IsRunning, IsPaused, CurrentFPS), automatic timing reset on resume to prevent large delta spikes. Enhanced webgpu-interop.js with visibility change listeners. Added 11 comprehensive render loop tests. Total: 108 tests passing | AI Assistant |
 | 1.9.0   | 2025-01-23 | Phase 7 completed: Shader management system created with ShaderCompilationInfo class for validation metadata, enhanced PDWebGpuShader with Validate() static method for WGSL syntax checking, ShaderLoader utility class for hot-reload support with ShaderReloaded event, shader name tracking and source code caching, WGSL language definition for Monaco editor (wgsl.monarch.json with complete syntax highlighting including keywords, types, attributes, built-ins, and functions). Added 18 comprehensive shader management tests. Total: 126 tests passing | AI Assistant |
 | 1.10.0  | 2025-01-23 | Phase 8 completed: Camera system created with PDWebGpuCameraBase abstract class providing view/projection matrix calculation with caching and dirty flags. Three camera types implemented: PDWebGpuOrbitCamera (target-based with rotation/zoom), PDWebGpuFirstPersonCamera (WASD movement with mouse look), PDWebGpuOrthographicCamera (parallel projection for 2D with pan/zoom). All cameras support configurable properties (FOV, aspect ratio, clipping planes, speed, sensitivity, bounds). Added 26 comprehensive camera tests. Total: 152 tests passing | AI Assistant |
+| 1.11.0  | 2025-01-23 | Phase 9 completed: Performance metrics system created with PDWebGpuPerformanceDisplayOptions (configurable overlay settings), CornerPosition enum (4 positions), PerformanceMetrics class (tracks FPS, frame time, draw calls, triangles with rolling average and usage calculations), PDWebGpuPerformanceDisplay component (real-time overlay with color-coded warnings, custom metrics support, number formatting). Metrics include FPS calculation, average frame time, frame time usage %, draw calls, triangle count, and custom user metrics. Added 21 comprehensive tests. Total: 173 tests passing | AI Assistant |

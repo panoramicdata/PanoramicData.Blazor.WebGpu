@@ -1,0 +1,111 @@
+@inherits PDWebGpuComponentBase
+
+<div class="pdwebgpu-performance-display @CssClass @GetPositionClass()" 
+     @attributes="AdditionalAttributes"
+     style="@GetContainerStyle()">
+    @if (Options.ShowFPS)
+    {
+        <div class="metric">
+            <span class="label">FPS:</span>
+            <span class="value">@_metrics.FPS.ToString("F1")</span>
+        </div>
+    }
+    
+    @if (Options.ShowFrameTime)
+    {
+        <div class="metric">
+            <span class="label">Frame Time:</span>
+            <span class="value">@_metrics.AverageFrameTime.ToString("F2") ms</span>
+        </div>
+    }
+    
+    @if (Options.ShowFrameTimeUsage && _targetFrameTime > 0)
+    {
+        <div class="metric">
+            <span class="label">Frame Usage:</span>
+            <span class="value @GetUsageClass()">@_metrics.GetFrameTimeUsage(_targetFrameTime).ToString("F1")%</span>
+        </div>
+    }
+    
+    @if (Options.ShowDrawCalls)
+    {
+        <div class="metric">
+            <span class="label">Draw Calls:</span>
+            <span class="value">@_metrics.DrawCalls</span>
+        </div>
+    }
+    
+    @if (Options.ShowTriangleCount)
+    {
+        <div class="metric">
+            <span class="label">Triangles:</span>
+            <span class="value">@FormatNumber(_metrics.TriangleCount)</span>
+        </div>
+    }
+    
+    @foreach (var customMetric in Options.CustomMetrics)
+    {
+        <div class="metric">
+            <span class="label">@customMetric.Key:</span>
+            <span class="value">@customMetric.Value()</span>
+        </div>
+    }
+</div>
+
+<style>
+    .pdwebgpu-performance-display {
+        position: fixed;
+        padding: 8px 12px;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 12px;
+        color: #00ff00;
+        background-color: rgba(0, 0, 0, var(--bg-opacity, 0.7));
+        border-radius: 4px;
+        z-index: 10000;
+        user-select: none;
+        pointer-events: none;
+    }
+
+    .pdwebgpu-performance-display.top-left {
+        top: 10px;
+        left: 10px;
+    }
+
+    .pdwebgpu-performance-display.top-right {
+        top: 10px;
+        right: 10px;
+    }
+
+    .pdwebgpu-performance-display.bottom-left {
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .pdwebgpu-performance-display.bottom-right {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .pdwebgpu-performance-display .metric {
+        margin: 2px 0;
+        white-space: nowrap;
+    }
+
+    .pdwebgpu-performance-display .label {
+        color: #888;
+        margin-right: 8px;
+    }
+
+    .pdwebgpu-performance-display .value {
+        color: #0f0;
+        font-weight: bold;
+    }
+
+    .pdwebgpu-performance-display .value.warning {
+        color: #ff0;
+    }
+
+    .pdwebgpu-performance-display .value.critical {
+        color: #f00;
+    }
+</style>
