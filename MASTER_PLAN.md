@@ -362,13 +362,18 @@ perfOptions = new PDWebGpuPerformanceDisplayOptions
 - [x] Add CreateShaderAsync method to service interface
 - [x] Add comprehensive resource tests (27 new tests, all passing)
 
-### Phase 6: Render Loop System
-- [ ] Implement variable frame rate mode
-- [ ] Implement fixed frame rate mode
-- [ ] Add frame timing calculations
-- [ ] Implement render loop events dispatching
-- [ ] Add pause behavior when tab inactive/window minimized
-- [ ] Add configuration properties to PDWebGpuContainer (including PauseWhenInactive)
+### Phase 6: Render Loop System ✓
+- [x] Implement variable frame rate mode (render as fast as possible with VSync limit)
+- [x] Implement fixed frame rate mode with configurable target FPS
+- [x] Add accurate frame timing calculations (delta time, total time, frame number)
+- [x] Implement render loop events dispatching (OnFrame with timing data)
+- [x] Add pause behavior when tab inactive/window minimized (PauseWhenInactive property)
+- [x] Add page visibility API integration via JavaScript interop
+- [x] Create IVisibilityCallback interface for visibility change notifications
+- [x] Add manual pause/resume methods (PauseRenderLoop, ResumeRenderLoop)
+- [x] Add render loop status properties (IsRunning, IsPaused, CurrentFPS)
+- [x] Implement automatic timing reset on resume to prevent large delta spikes
+- [x] Add comprehensive render loop tests (11 new tests, all passing)
 
 ### Phase 7: Shader Management
 - [ ] Implement WGSL text shader loading
@@ -646,3 +651,4 @@ When you discover important patterns, conventions, or decisions during developme
 | 1.6.0   | 2025-01-23 | Phase 4 completed: Core component infrastructure created with enhanced PDWebGpuComponentBase (event callbacks, input handling), PDWebGpuContainer (layered rendering with background WebGPU canvas and foreground HTML), PDWebGpuCanvas component, FrameRateMode enum, render loop system with Variable/Fixed frame rates. Added 17 comprehensive tests. Total: 70 tests passing | AI Assistant |
 | 1.6.1   | 2025-01-23 | Refactoring: Converted all Razor components to code-behind pattern. Created PDWebGpuContainer.razor.cs and PDWebGpuCanvas.razor.cs with all logic, parameters, and services. Updated copilot-instructions.md with code-behind pattern guidelines. All 70 tests still passing | AI Assistant |
 | 1.7.0   | 2025-01-23 | Phase 5 completed: Resource management wrapper classes created - PDWebGpuBuffer (with BufferType enum), PDWebGpuTexture (with TextureFormat enum), PDWebGpuSampler (with FilterMode/AddressMode enums), PDWebGpuShader, PDWebGpuPipeline (with PipelineType enum), PDWebGpuBindGroup, PDWebGpuCommandEncoder. All resources implement IDisposable + IAsyncDisposable. Added CreateShaderAsync to service. Added 27 comprehensive tests. Total: 97 tests passing | AI Assistant |
+| 1.8.0   | 2025-01-23 | Phase 6 completed: Enhanced render loop system with page visibility API integration, IVisibilityCallback interface for visibility change notifications, PauseWhenInactive functionality with automatic pause/resume based on tab visibility, manual pause/resume methods (PauseRenderLoop, ResumeRenderLoop), render loop status properties (IsRunning, IsPaused, CurrentFPS), automatic timing reset on resume to prevent large delta spikes. Enhanced webgpu-interop.js with visibility change listeners. Added 11 comprehensive render loop tests. Total: 108 tests passing | AI Assistant |

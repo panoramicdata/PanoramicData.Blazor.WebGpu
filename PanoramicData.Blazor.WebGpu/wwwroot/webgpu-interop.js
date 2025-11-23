@@ -15,6 +15,60 @@ class WebGpuInterop {
         this.canvasContexts = new Map();
         this.resources = new Map();
         this.nextResourceId = 1;
+        this.visibilityCallbacks = new Map();
+        this.nextCallbackId = 1;
+
+        // Set up visibility change listener
+        this.setupVisibilityListener();
+    }
+
+    /**
+     * Set up the page visibility change listener
+     */
+    setupVisibilityListener() {
+        document.addEventListener('visibilitychange', () => {
+            const isVisible = !document.hidden;
+            // Notify all registered callbacks
+            this.visibilityCallbacks.forEach(callback => {
+                try {
+                    callback.invokeMethodAsync('OnVisibilityChanged', isVisible);
+                } catch (error) {
+                    console.error('Error invoking visibility callback:', error);
+                }
+            });
+        });
+    }
+
+    /**
+     * Register a .NET callback for visibility changes
+     * @param {object} dotNetRef - The .NET object reference
+     * @returns {number} Callback ID for later removal
+     */
+    registerVisibilityCallback(dotNetRef) {
+        const callbackId = this.nextCallbackId++;
+        this.visibilityCallbacks.set(callbackId, dotNetRef);
+        
+        // Immediately notify of current visibility state
+        const isVisible = !document.hidden;
+        dotNetRef.invokeMethodAsync('OnVisibilityChanged', isVisible);
+        
+        return callbackId;
+    }
+
+    /**
+     * Unregister a visibility callback
+     * @param {number} callbackId - The callback ID to remove
+     */
+    unregisterVisibilityCallback(callbackId) {
+        this.visibilityCallbacks.delete(callbackId);
+    }
+
+    /**
+     * Check if the page is currently visible
+     * @returns {boolean} True if page is visible
+     */
+    isPageVisible() {
+        return !document.hidden;
     }
 
     /**

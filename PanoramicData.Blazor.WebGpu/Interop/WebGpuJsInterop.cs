@@ -3,6 +3,20 @@
 namespace PanoramicData.Blazor.WebGpu.Interop;
 
 /// <summary>
+/// Interface for components that want to receive page visibility change notifications.
+/// </summary>
+public interface IVisibilityCallback
+{
+	/// <summary>
+	/// Called when the page visibility changes.
+	/// </summary>
+	/// <param name="isVisible">True if the page is visible; otherwise, false.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	[JSInvokable]
+	Task OnVisibilityChanged(bool isVisible);
+}
+
+/// <summary>
 /// Provides JavaScript interop functionality for WebGPU operations.
 /// This class wraps the webgpu-interop.js JavaScript module.
 /// </summary>
@@ -183,6 +197,58 @@ internal sealed class WebGpuJsInterop : IAsyncDisposable
 		catch
 		{
 			// Ignore errors during resource cleanup
+		}
+	}
+
+	/// <summary>
+	/// Registers a .NET callback for page visibility changes.
+	/// </summary>
+	/// <param name="dotNetRef">The .NET object reference.</param>
+	/// <returns>Callback ID for later removal.</returns>
+	public async ValueTask<int> RegisterVisibilityCallbackAsync(DotNetObjectReference<IVisibilityCallback> dotNetRef)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("registerVisibilityCallback", dotNetRef);
+		}
+		catch (Exception ex)
+		{
+			throw new PDWebGpuException("Failed to register visibility callback", ex);
+		}
+	}
+
+	/// <summary>
+	/// Unregisters a visibility callback.
+	/// </summary>
+	/// <param name="callbackId">The callback ID to remove.</param>
+	public async ValueTask UnregisterVisibilityCallbackAsync(int callbackId)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("unregisterVisibilityCallback", callbackId);
+		}
+		catch
+		{
+			// Ignore errors during cleanup
+		}
+	}
+
+	/// <summary>
+	/// Checks if the page is currently visible.
+	/// </summary>
+	/// <returns>True if the page is visible.</returns>
+	public async ValueTask<bool> IsPageVisibleAsync()
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<bool>("isPageVisible");
+		}
+		catch (Exception ex)
+		{
+			throw new PDWebGpuException("Failed to check page visibility", ex);
 		}
 	}
 
