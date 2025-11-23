@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
-using PanoramicData.Blazor.WebGpu.Camera;
 using PanoramicData.Blazor.WebGpu.Components;
-using PanoramicData.Blazor.WebGpu.Demo.Shaders;
-using PanoramicData.Blazor.WebGpu.Diagnostics;
+using PanoramicData.Blazor.WebGpu.Cameras;
+using PanoramicData.Blazor.WebGpu.Events;
 using PanoramicData.Blazor.WebGpu.Performance;
 using PanoramicData.Blazor.WebGpu.Services;
+using PanoramicData.Blazor.WebGpu.Demo.Shaders;
 
 namespace PanoramicData.Blazor.WebGpu.Demo.Pages;
 
@@ -61,91 +61,72 @@ public partial class Home : IDisposable
 			Left = -2.0f,
 			Right = 2.0f,
 			Bottom = -2.0f,
-			Top = 2.0f,
-			NearPlane = 0.1f,
-			FarPlane = 100.0f
+			Top = 2.0f
 		};
 
-		// Set initial active camera
-		_activeCamera = _orbitCamera;
+		SetCameraMode(CameraMode.Orbit);
+
+		// Check WebGPU support
+		_webGpuSupported = await WebGpuService.IsSupportedAsync();
 	}
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	private async Task OnGpuReady(EventArgs args)
 	{
-		if (firstRender)
+		// GPU is initialized and ready for rendering
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task OnError(PDWebGpuErrorEventArgs args)
+	{
+		_deviceError = args.Message;
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task OnFrame(PDWebGpuFrameEventArgs args)
+	{
+		// Update camera
+		if (_activeCamera != null)
 		{
-			// Check WebGPU support after first render to ensure JS is loaded
-			try
+			// Simple rotation for orbit camera
+			if (_cameraMode == CameraMode.Orbit && _activeCamera is PDWebGpuOrbitCamera orbitCam)
 			{
-				_webGpuSupported = await WebGpuService.IsSupportedAsync();
-				
-				if (!_webGpuSupported.Value)
-				{
-					var compatInfo = await WebGpuService.GetCompatibilityInfoAsync();
-					_deviceError = DiagnosticHelper.GetNotSupportedMessage(compatInfo);
-				}
-				
-				StateHasChanged();
-			}
-			catch (Exception ex)
-			{
-				_webGpuSupported = false;
-				_deviceError = $"Error checking WebGPU support: {ex.Message}\n\nStack: {ex.StackTrace}";
-				StateHasChanged();
+				orbitCam.Rotate((float)args.DeltaTime * 0.2f, 0);
 			}
 		}
+
+		// TODO: Actual rendering logic will be implemented in a future phase
+		// For now, the canvas is initialized and the render loop is running
+		// This demonstrates the framework structure working correctly
+
+		await Task.CompletedTask;
 	}
 
-	/// <summary>
-	/// Called when Monaco editor is initialized.
-	/// </summary>
-	private Task OnMonacoInit()
-	{
-		// Placeholder for future Monaco integration
-		return Task.CompletedTask;
-	}
-
-	/// <summary>
-	/// Compiles the shader code in the editor.
-	/// </summary>
 	private async Task CompileShader()
 	{
 		_isCompiling = true;
 		_compilationError = null;
 		_compilationSuccess = false;
+		StateHasChanged();
 
 		try
 		{
 			// Validate shader
-			var validationResult = Resources.PDWebGpuShader.Validate(_currentShaderCode);
-			
-			if (!validationResult.Success)
+			var validation = Resources.PDWebGpuShader.Validate(_currentShaderCode);
+			if (!validation.IsValid)
 			{
-				_compilationError = validationResult.ErrorMessage;
-				StateHasChanged();
+				_compilationError = validation.ErrorMessage ?? "Unknown validation error";
 				return;
 			}
 
-			// Try to create shader module (this will compile it)
-			await WebGpuService.CreateShaderAsync(_currentShaderCode);
-
+			// In a future phase, this will actually compile and use the shader
+			// For now, just validate it
 			_compilationSuccess = true;
-			
-			// Clear success message after 3 seconds
-			_ = Task.Run(async () =>
-			{
-				await Task.Delay(3000);
-				_compilationSuccess = false;
-				await InvokeAsync(StateHasChanged);
-			});
-		}
-		catch (PDWebGpuShaderCompilationException ex)
-		{
-			_compilationError = DiagnosticHelper.GetShaderErrorMessage(ex);
+			await Task.Delay(3000); // Show success message for 3 seconds
+			_compilationSuccess = false;
 		}
 		catch (Exception ex)
 		{
-			_compilationError = $"Unexpected error: {ex.Message}";
+			_compilationError = ex.Message;
 		}
 		finally
 		{
@@ -154,36 +135,20 @@ public partial class Home : IDisposable
 		}
 	}
 
-	/// <summary>
-	/// Loads an example shader into the editor.
-	/// </summary>
-	private void LoadExampleShader(ChangeEventArgs e)
-	{
-		var shaderName = e.Value?.ToString();
-		if (string.IsNullOrEmpty(shaderName))
-		{
-			return;
-		}
-
-		if (_exampleShaders.TryGetValue(shaderName, out var shaderCode))
-		{
-			_currentShaderCode = shaderCode;
-			_compilationError = null;
-			_compilationSuccess = false;
-		}
-	}
-
-	/// <summary>
-	/// Toggles the performance metrics display.
-	/// </summary>
 	private void TogglePerformanceMetrics()
 	{
 		_showPerformance = !_showPerformance;
 	}
 
-	/// <summary>
-	/// Sets the active camera mode.
-	/// </summary>
+	private void LoadExampleShader(ChangeEventArgs args)
+	{
+		var selectedExample = args.Value?.ToString();
+		if (!string.IsNullOrEmpty(selectedExample) && _exampleShaders.ContainsKey(selectedExample))
+		{
+			_currentShaderCode = _exampleShaders[selectedExample];
+		}
+	}
+
 	private void SetCameraMode(CameraMode mode)
 	{
 		_cameraMode = mode;
@@ -194,62 +159,29 @@ public partial class Home : IDisposable
 			CameraMode.Orthographic => _orthoCamera,
 			_ => _orbitCamera
 		};
-	}
 
-	/// <summary>
-	/// Called on each frame render.
-	/// </summary>
-	private void OnFrame(PDWebGpuFrameEventArgs args)
-	{
-		// TODO: Implement actual rendering logic
-		// This is where you would:
-		// 1. Update camera matrices
-		// 2. Update uniforms (time, transformations)
-		// 3. Execute render pipeline
-		// 4. Draw geometry
-
-		// For now, just update the active camera if needed
-		if (_activeCamera != null)
+		// Update aspect ratio for all cameras
+		if (_container?.Canvas != null)
 		{
-			// Camera matrices are automatically calculated via properties
-			_ = _activeCamera.ViewProjectionMatrix;
+			var aspectRatio = (float)_container.Canvas.Width / _container.Canvas.Height;
+			if (_orbitCamera != null) _orbitCamera.AspectRatio = aspectRatio;
+			if (_firstPersonCamera != null) _firstPersonCamera.AspectRatio = aspectRatio;
+			if (_orthoCamera != null)
+			{
+				_orthoCamera.Left = -2.0f * aspectRatio;
+				_orthoCamera.Right = 2.0f * aspectRatio;
+			}
 		}
 	}
 
-	/// <summary>
-	/// Called when GPU is ready.
-	/// </summary>
-	private void OnGpuReady(EventArgs args)
-	{
-		// GPU initialized successfully
-		_webGpuSupported = true;
-		StateHasChanged();
-	}
-
-	/// <summary>
-	/// Called when an error occurs.
-	/// </summary>
-	private void OnError(PDWebGpuErrorEventArgs args)
-	{
-		_deviceError = args.Exception is PDWebGpuDeviceException deviceEx
-			? DiagnosticHelper.GetDeviceErrorMessage(deviceEx)
-			: $"Error: {args.Message}";
-		
-		StateHasChanged();
-	}
-
-	/// <summary>
-	/// Disposes resources.
-	/// </summary>
 	public void Dispose()
 	{
-		// Cleanup will be handled by component disposal
-		GC.SuppressFinalize(this);
+		// Resources will be disposed in future phases when rendering is implemented
 	}
 }
 
 /// <summary>
-/// Camera mode enumeration.
+/// Camera modes for the demo.
 /// </summary>
 public enum CameraMode
 {

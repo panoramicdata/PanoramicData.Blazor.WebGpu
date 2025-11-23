@@ -92,8 +92,59 @@ public interface IPDWebGpuService : IAsyncDisposable
 	/// Creates a shader module from WGSL source code and returns a wrapper object.
 	/// </summary>
 	/// <param name="wgslCode">The WGSL shader source code.</param>
+	/// <param name="name">Optional name for the shader for debugging purposes.</param>
 	/// <returns>A PDWebGpuShader instance.</returns>
-	Task<Resources.PDWebGpuShader> CreateShaderAsync(string wgslCode);
+	Task<Resources.PDWebGpuShader> CreateShaderAsync(string wgslCode, string? name = null);
+
+	/// <summary>
+	/// Creates a GPU buffer for vertex, index, uniform, or storage data.
+	/// </summary>
+	/// <param name="data">Initial buffer data.</param>
+	/// <param name="bufferType">Type of buffer to create.</param>
+	/// <param name="name">Optional name for the buffer for debugging purposes.</param>
+	/// <returns>A PDWebGpuBuffer instance.</returns>
+	Task<Resources.PDWebGpuBuffer> CreateBufferAsync(byte[] data, Resources.BufferType bufferType, string? name = null);
+
+	/// <summary>
+	/// Creates a GPU buffer for vertex, index, uniform, or storage data.
+	/// </summary>
+	/// <param name="data">Initial buffer data as floats.</param>
+	/// <param name="bufferType">Type of buffer to create.</param>
+	/// <param name="name">Optional name for the buffer for debugging purposes.</param>
+	/// <returns>A PDWebGpuBuffer instance.</returns>
+	Task<Resources.PDWebGpuBuffer> CreateBufferAsync(float[] data, Resources.BufferType bufferType, string? name = null);
+
+	/// <summary>
+	/// Creates a GPU buffer for vertex, index, uniform, or storage data.
+	/// </summary>
+	/// <param name="data">Initial buffer data as unsigned shorts.</param>
+	/// <param name="bufferType">Type of buffer to create.</param>
+	/// <param name="name">Optional name for the buffer for debugging purposes.</param>
+	/// <returns>A PDWebGpuBuffer instance.</returns>
+	Task<Resources.PDWebGpuBuffer> CreateBufferAsync(ushort[] data, Resources.BufferType bufferType, string? name = null);
+
+	/// <summary>
+	/// Creates a command encoder for recording GPU commands.
+	/// </summary>
+	/// <param name="name">Optional name for the encoder for debugging purposes.</param>
+	/// <returns>A PDWebGpuCommandEncoder instance.</returns>
+	Task<Resources.PDWebGpuCommandEncoder> CreateCommandEncoderAsync(string? name = null);
+
+	/// <summary>
+	/// Creates a render pipeline.
+	/// </summary>
+	/// <param name="descriptor">Pipeline configuration.</param>
+	/// <param name="name">Optional name for the pipeline for debugging purposes.</param>
+	/// <returns>A PDWebGpuPipeline instance.</returns>
+	Task<Resources.PDWebGpuPipeline> CreateRenderPipelineAsync(Resources.RenderPipelineDescriptor descriptor, string? name = null);
+
+	/// <summary>
+	/// Creates a bind group for binding resources to shaders.
+	/// </summary>
+	/// <param name="descriptor">Bind group configuration.</param>
+	/// <param name="name">Optional name for the bind group for debugging purposes.</param>
+	/// <returns>A PDWebGpuBindGroup instance.</returns>
+	Task<Resources.PDWebGpuBindGroup> CreateBindGroupAsync(Resources.BindGroupDescriptor descriptor, string? name = null);
 
 	/// <summary>
 	/// Submits command buffers to the GPU queue.
