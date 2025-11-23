@@ -28,48 +28,6 @@ This file provides instructions for GitHub Copilot and other AI coding assistant
 - Private fields use underscore prefix: `_fieldName`
 - XML documentation required on all public APIs
 
-## Razor Component Pattern
-- **ALWAYS use code-behind**: All Razor components must use the code-behind pattern
-  - Razor file (`.razor`): Contains only markup
-  - Code-behind file (`.razor.cs`): Contains all logic, parameters, and injected services
-- **No @code blocks**: Never use `@code` blocks in `.razor` files
-- **No @inject directives**: Use `[Inject]` attribute in code-behind instead
-- **Partial class**: Code-behind must be `partial class` matching component name
-- **Namespace**: Code-behind must be in `PanoramicData.Blazor.WebGpu.Components` namespace
-- **Inherits**: Razor file uses `@inherits` directive, code-behind inherits from base class
-
-### Example Pattern:
-**MyComponent.razor:**
-```razor
-@inherits PDWebGpuComponentBase
-
-<div class="my-component @CssClass" @attributes="AdditionalAttributes">
-    @ChildContent
-</div>
-```
-
-**MyComponent.razor.cs:**
-```csharp
-using Microsoft.AspNetCore.Components;
-using PanoramicData.Blazor.WebGpu.Services;
-
-namespace PanoramicData.Blazor.WebGpu.Components;
-
-public partial class MyComponent : PDWebGpuComponentBase
-{
-    [Inject]
-    private IPDWebGpuService WebGpuService { get; set; } = default!;
-
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Component logic here
-    }
-}
-```
-
 ## Architecture Patterns
 - **Component-based design**: All components inherit from `PDWebGpuComponentBase`
 - **Service injection**: Use dependency injection for cross-cutting concerns
@@ -85,20 +43,12 @@ public partial class MyComponent : PDWebGpuComponentBase
 - All WebGPU operations must go through C# wrapper classes
 
 ## Testing Strategy
-- **Framework**: xUnit 2.9.3 (latest available for .NET 10)
-- **Assertions**: FluentAssertions 8.8.0 (use `.Should()` syntax)
-  - Note: AwesomeAssertions was preferred but not compatible with .NET 10
-- **Mocking**: Moq 4.20.72 for creating test doubles
-- **Code Coverage**: Coverlet (target > 80% coverage)
-- **Test Base Class**: All tests inherit from `TestBase`
-- **Test Naming**: Use `ComponentName_Should_DoSomething_When_Condition` pattern
-- **Test Structure**: Follow Arrange-Act-Assert (AAA) pattern
-- **Mock Strategy**: 
-  - Use `MockJSRuntime` for JavaScript interop testing
-  - Use `MockWebGpuDevice` for WebGPU device simulation
-  - Never require actual GPU hardware for unit tests
-- **Test Organization**: Group tests by feature area in separate files
-- **Async Tests**: Use `async Task` for all async operations, never `async void`
+- Unit tests for all framework components
+- Integration tests for WebGPU interop
+- Mock/stub WebGPU API for unit testing
+- Target > 80% code coverage
+- Use xUnit as testing framework
+- Test project: `PanoramicData.Blazor.WebGpu.Tests`
 
 ## Performance Optimizations
 - Minimize allocations in render loop
@@ -113,8 +63,6 @@ public partial class MyComponent : PDWebGpuComponentBase
 - Don't expose JavaScript objects directly to consumers
 - Always handle WebGPU device lost scenarios
 - Remember to update shader validation on hot-reload
-- Moq Mock<T> instances don't need to be disposed in tests (not IDisposable)
-- **Never use @code blocks or @inject in .razor files** - always use code-behind
 
 ## Development Workflow
 1. Read MASTER_PLAN.md before starting work

@@ -1,0 +1,15 @@
+@inherits PDWebGpuComponentBase
+
+<canvas @ref="_canvasRef"
+        id="@CanvasId"
+        class="pdwebgpu-canvas @CssClass"
+        @attributes="AdditionalAttributes"
+        @onmousedown="HandleMouseDownAsync"
+        @onmouseup="HandleMouseUpAsync"
+        @onmousemove="HandleMouseMoveAsync"
+        @onwheel="HandleMouseWheelAsync"
+        @ontouchstart="HandleTouchStartAsync"
+        @ontouchmove="HandleTouchMoveAsync"
+        @ontouchend="HandleTouchEndAsync"
+        style="display: block; width: 100%; height: 100%;">
+</canvas>

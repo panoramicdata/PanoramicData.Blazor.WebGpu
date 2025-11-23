@@ -1,0 +1,154 @@
+﻿namespace PanoramicData.Blazor.WebGpu.Services;
+
+/// <summary>
+/// Primary service interface for WebGPU operations.
+/// Manages device lifecycle, initialization, and resource coordination.
+/// </summary>
+public interface IPDWebGpuService : IAsyncDisposable
+{
+	/// <summary>
+	/// Gets a value indicating whether WebGPU is supported in the current browser.
+	/// </summary>
+	bool IsSupported { get; }
+
+	/// <summary>
+	/// Gets a value indicating whether the WebGPU device has been initialized.
+	/// </summary>
+	bool IsInitialized { get; }
+
+	/// <summary>
+	/// Gets the device information after initialization.
+	/// </summary>
+	Interop.WebGpuDeviceInfo? DeviceInfo { get; }
+
+	/// <summary>
+	/// Gets the browser compatibility information.
+	/// </summary>
+	Interop.WebGpuCompatibilityInfo? CompatibilityInfo { get; }
+
+	/// <summary>
+	/// Event raised when the WebGPU device is initialized and ready.
+	/// </summary>
+	event EventHandler<EventArgs>? DeviceReady;
+
+	/// <summary>
+	/// Event raised when the WebGPU device is lost.
+	/// </summary>
+	event EventHandler<PDWebGpuDeviceLostEventArgs>? DeviceLost;
+
+	/// <summary>
+	/// Event raised when an error occurs.
+	/// </summary>
+	event EventHandler<PDWebGpuErrorEventArgs>? Error;
+
+	/// <summary>
+	/// Checks if WebGPU is supported in the current browser.
+	/// </summary>
+	/// <returns>True if WebGPU is supported; otherwise, false.</returns>
+	Task<bool> CheckSupportAsync();
+
+	/// <summary>
+	/// Gets browser compatibility information for WebGPU.
+	/// </summary>
+	/// <returns>Compatibility information.</returns>
+	Task<Interop.WebGpuCompatibilityInfo> GetCompatibilityInfoAsync();
+
+	/// <summary>
+	/// Initializes the WebGPU device with optional configuration.
+	/// </summary>
+	/// <param name="powerPreference">Power preference (low-power, high-performance).</param>
+	/// <param name="requiredFeatures">Optional required GPU features.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	Task InitializeAsync(string powerPreference = "high-performance", string[]? requiredFeatures = null);
+
+	/// <summary>
+	/// Ensures the WebGPU device is initialized, initializing it if necessary.
+	/// </summary>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	Task EnsureInitializedAsync();
+
+	/// <summary>
+	/// Gets or creates a canvas context for the specified canvas ID.
+	/// </summary>
+	/// <param name="canvasId">The canvas element ID.</param>
+	/// <returns>The canvas context ID.</returns>
+	Task<string> GetCanvasContextAsync(string canvasId);
+
+	/// <summary>
+	/// Configures a canvas context with the specified format and options.
+	/// </summary>
+	/// <param name="contextId">The canvas context ID.</param>
+	/// <param name="format">Texture format (optional, uses preferred format if not specified).</param>
+	/// <param name="alphaMode">Alpha mode (opaque, premultiplied).</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	Task ConfigureCanvasContextAsync(string contextId, string? format = null, string alphaMode = "opaque");
+
+	/// <summary>
+	/// Creates a shader module from WGSL source code.
+	/// </summary>
+	/// <param name="wgslCode">The WGSL shader source code.</param>
+	/// <returns>The resource ID of the created shader module.</returns>
+	Task<int> CreateShaderModuleAsync(string wgslCode);
+
+	/// <summary>
+	/// Creates a shader module from WGSL source code and returns a wrapper object.
+	/// </summary>
+	/// <param name="wgslCode">The WGSL shader source code.</param>
+	/// <returns>A PDWebGpuShader instance.</returns>
+	Task<Resources.PDWebGpuShader> CreateShaderAsync(string wgslCode);
+
+	/// <summary>
+	/// Submits command buffers to the GPU queue.
+	/// </summary>
+	/// <param name="commandBufferIds">Array of command buffer resource IDs.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	Task SubmitCommandBuffersAsync(params int[] commandBufferIds);
+
+	/// <summary>
+	/// Releases a GPU resource.
+	/// </summary>
+	/// <param name="resourceId">The resource ID to release.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	Task ReleaseResourceAsync(int resourceId);
+}
+
+/// <summary>
+/// Event args for device lost events.
+/// </summary>
+public class PDWebGpuDeviceLostEventArgs : EventArgs
+{
+	/// <summary>
+	/// Gets or sets the reason the device was lost.
+	/// </summary>
+	public string Reason { get; set; } = string.Empty;
+
+	/// <summary>
+	/// Gets or sets additional message about the device loss.
+	/// </summary>
+	public string Message { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Event args for WebGPU error events.
+/// </summary>
+public class PDWebGpuErrorEventArgs : EventArgs
+{
+	/// <summary>
+	/// Initializes a new instance of the <see cref="PDWebGpuErrorEventArgs"/> class.
+	/// </summary>
+	/// <param name="exception">The exception that occurred.</param>
+	public PDWebGpuErrorEventArgs(Exception exception)
+	{
+		Exception = exception;
+	}
+
+	/// <summary>
+	/// Gets the exception that occurred.
+	/// </summary>
+	public Exception Exception { get; }
+
+	/// <summary>
+	/// Gets the error message.
+	/// </summary>
+	public string Message => Exception.Message;
+}

@@ -303,53 +303,64 @@ perfOptions = new PDWebGpuPerformanceDisplayOptions
 
 ## Implementation Phases
 
-### Phase 1: Project Setup
-- [ ] Create solution structure (.slnx)
-- [ ] Create four projects (Library, Tests, Template, Demo)
-- [ ] Copy .editorconfig from Jira.Api
-- [ ] Create copilot-instructions.md
-- [ ] Configure project references and dependencies
-- [ ] Add PanoramicData.Blazor NuGet reference (latest version)
-- [ ] Initialize Git repository (if not already initialized)
-- [ ] Create initial commit with project structure
+### Phase 1: Project Setup ✓
+- [x] Create solution structure (.slnx)
+- [x] Create four projects (Library, Tests, Template, Demo)
+- [x] Copy .editorconfig from Jira.Api
+- [x] Create copilot-instructions.md
+- [x] Configure project references and dependencies
+- [x] Add PanoramicData.Blazor NuGet reference (latest version)
+- [x] Initialize Git repository (if not already initialized)
+- [x] Create initial commit with project structure
 
-### Phase 1.5: Test Infrastructure Setup
-- [ ] Configure test project with xUnit/NUnit
-- [ ] Set up test helpers and utilities
-- [ ] Create mock/stub infrastructure for WebGPU interop testing
-- [ ] Configure code coverage tooling
-- [ ] Create initial smoke tests
+### Phase 1.5: Test Infrastructure Setup ✓
+- [x] Configure test project with xUnit and FluentAssertions (Note: xUnit 2.9.3 used instead of 3.0, FluentAssertions used instead of AwesomeAssertions due to .NET 10 compatibility)
+- [x] Set up test helpers and utilities
+- [x] Create mock/stub infrastructure for WebGPU interop testing
+- [x] Configure code coverage tooling (Coverlet)
+- [x] Create initial smoke tests (10 passing tests)
 
-### Phase 2: Core Framework - JavaScript Interop
-- [ ] Create webgpu-interop.js with minimal WebGPU initialization
-- [ ] Implement adapter/device acquisition
-- [ ] Implement canvas context setup
-- [ ] Add command buffer submission
-- [ ] Add shader compilation forwarding
+### Phase 2: Core Framework - JavaScript Interop ✓
+- [x] Create webgpu-interop.js with minimal WebGPU initialization
+- [x] Implement adapter/device acquisition
+- [x] Implement canvas context setup
+- [x] Add command buffer submission
+- [x] Add shader compilation forwarding
+- [x] Create C# interop wrapper (WebGpuJsInterop)
+- [x] Create exception classes (PDWebGpuException, PDWebGpuDeviceException, PDWebGpuShaderCompilationException, PDWebGpuNotSupportedException)
+- [x] Add comprehensive tests for exceptions and interop (21 new tests, all passing)
 
-### Phase 3: Core Framework - C# Services
-- [ ] Create IPDWebGpuService interface
-- [ ] Implement PDWebGpuService with DI registration
-- [ ] Add WebGPU device lifecycle management
-- [ ] Implement initialization and error handling
+### Phase 3: Core Framework - C# Services ✓
+- [x] Create IPDWebGpuService interface
+- [x] Implement PDWebGpuService with DI registration
+- [x] Add WebGPU device lifecycle management
+- [x] Implement initialization and error handling
+- [x] Add event system (DeviceReady, DeviceLost, Error)
+- [x] Create dependency injection extension methods
+- [x] Add comprehensive service tests (22 new tests, all passing)
 
-### Phase 4: Core Framework - Base Components
-- [ ] Create PDWebGpuComponentBase abstract class
-- [ ] Implement OnFrame, OnResize, OnGpuReady, OnError events
-- [ ] Add input handling hooks (mouse, touch)
-- [ ] Create PDWebGpuContainer component
-- [ ] Implement layered rendering (background canvas + foreground div)
-- [ ] Add automatic screen resize handling
+### Phase 4: Core Framework - Base Components ✓
+- [x] Create PDWebGpuComponentBase abstract class with event support
+- [x] Implement OnFrame, OnResize, OnGpuReady, OnError events
+- [x] Add input handling hooks (mouse, touch)
+- [x] Create PDWebGpuContainer component with layered rendering
+- [x] Create PDWebGpuCanvas component
+- [x] Implement automatic screen resize handling
+- [x] Add FrameRateMode enum (Variable, Fixed)
+- [x] Implement render loop system with configurable frame rates
+- [x] Add comprehensive component tests (17 new tests, all passing)
 
-### Phase 5: Resource Management - Wrapper Classes
-- [ ] Implement PDWebGpuBuffer (vertex, uniform, storage)
-- [ ] Implement PDWebGpuTexture
-- [ ] Implement PDWebGpuSampler
-- [ ] Implement PDWebGpuShader (WGSL text only)
-- [ ] Implement PDWebGpuPipeline (render + compute)
-- [ ] Implement PDWebGpuBindGroup
-- [ ] Implement PDWebGpuCommandEncoder
-- [ ] Add resource disposal and lifecycle management
+### Phase 5: Resource Management - Wrapper Classes ✓
+- [x] Implement PDWebGpuBuffer (vertex, uniform, storage) with BufferType enum
+- [x] Implement PDWebGpuTexture with TextureFormat enum (RGBA8Unorm, BGRA8Unorm, Depth24PlusStencil8, Depth32Float)
+- [x] Implement PDWebGpuSampler with FilterMode and AddressMode enums
+- [x] Implement PDWebGpuShader (WGSL text only)
+- [x] Implement PDWebGpuPipeline (render + compute) with PipelineType enum
+- [x] Implement PDWebGpuBindGroup
+- [x] Implement PDWebGpuCommandEncoder with Finish() method
+- [x] Add resource disposal and lifecycle management (IDisposable + IAsyncDisposable)
+- [x] Add CreateShaderAsync method to service interface
+- [x] Add comprehensive resource tests (27 new tests, all passing)
 
 ### Phase 6: Render Loop System
 - [ ] Implement variable frame rate mode
@@ -628,3 +639,10 @@ When you discover important patterns, conventions, or decisions during developme
 |---------|------|---------|--------|
 | 1.0.0   | 2025-01-23 | Initial master plan created | AI Assistant |
 | 1.1.0   | 2025-01-23 | Updated based on clarifications: removed binary shader support, added test project, clarified canvas management, added pause behavior, updated copyright to 2025, removed GPU memory metrics, updated template format to .vstemplate, added WGSL language file support | AI Assistant |
+| 1.2.0   | 2025-01-23 | Phase 1 completed: Solution structure created with 4 projects, .editorconfig copied, copilot-instructions.md created, project references configured, PanoramicData.Blazor v9.0.328 added, Git repository initialized | AI Assistant |
+| 1.3.0   | 2025-01-23 | Phase 1.5 completed: Test infrastructure setup with xUnit 2.9.3, FluentAssertions 8.8.0, Moq 4.20.72, Coverlet code coverage, created TestBase, MockJSRuntime, MockWebGpuDevice, TestData, TestHelpers, and 10 passing smoke tests. Created PDWebGpuComponentBase placeholder class in main library | AI Assistant |
+| 1.4.0   | 2025-01-23 | Phase 2 completed: JavaScript interop layer created with webgpu-interop.js (346 lines), WebGpuJsInterop C# wrapper, 4 exception classes with detailed error handling (PDWebGpuException, PDWebGpuDeviceException, PDWebGpuShaderCompilationException, PDWebGpuNotSupportedException). Added 21 comprehensive tests. Total: 31 tests passing. Branch renamed from master to main | AI Assistant |
+| 1.5.0   | 2025-01-23 | Phase 3 completed: Core service layer created with IPDWebGpuService interface and PDWebGpuService implementation. Features include device lifecycle management, initialization with error handling, event system (DeviceReady, DeviceLost, Error), dependency injection extensions (AddPDWebGpu). Added 22 comprehensive tests covering all service functionality. Total: 53 tests passing | AI Assistant |
+| 1.6.0   | 2025-01-23 | Phase 4 completed: Core component infrastructure created with enhanced PDWebGpuComponentBase (event callbacks, input handling), PDWebGpuContainer (layered rendering with background WebGPU canvas and foreground HTML), PDWebGpuCanvas component, FrameRateMode enum, render loop system with Variable/Fixed frame rates. Added 17 comprehensive tests. Total: 70 tests passing | AI Assistant |
+| 1.6.1   | 2025-01-23 | Refactoring: Converted all Razor components to code-behind pattern. Created PDWebGpuContainer.razor.cs and PDWebGpuCanvas.razor.cs with all logic, parameters, and services. Updated copilot-instructions.md with code-behind pattern guidelines. All 70 tests still passing | AI Assistant |
+| 1.7.0   | 2025-01-23 | Phase 5 completed: Resource management wrapper classes created - PDWebGpuBuffer (with BufferType enum), PDWebGpuTexture (with TextureFormat enum), PDWebGpuSampler (with FilterMode/AddressMode enums), PDWebGpuShader, PDWebGpuPipeline (with PipelineType enum), PDWebGpuBindGroup, PDWebGpuCommandEncoder. All resources implement IDisposable + IAsyncDisposable. Added CreateShaderAsync to service. Added 27 comprehensive tests. Total: 97 tests passing | AI Assistant |

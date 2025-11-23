@@ -1,0 +1,16 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="MASTER_PLAN.md" />
+  </Folder>
+  <Project Path="PanoramicData.Blazor.WebGpu.Demo/PanoramicData.Blazor.WebGpu.Demo.csproj" />
+  <Project Path="PanoramicData.Blazor.WebGpu.Template/PanoramicData.Blazor.WebGpu.Template.csproj" />
+  <Project Path="PanoramicData.Blazor.WebGpu.Tests/PanoramicData.Blazor.WebGpu.Tests.csproj" />
+  <Project Path="PanoramicData.Blazor.WebGpu/PanoramicData.Blazor.WebGpu.csproj" />
+</Solution>

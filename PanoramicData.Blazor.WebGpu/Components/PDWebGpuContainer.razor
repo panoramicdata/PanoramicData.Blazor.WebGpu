@@ -1,0 +1,19 @@
+@inherits PDWebGpuComponentBase
+
+<div class="pdwebgpu-container @CssClass" @attributes="AdditionalAttributes" style="position: relative; width: 100%; height: 100%;">
+    <!-- Background layer (Z-Index: 0) - WebGPU Canvas -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;">
+        <PDWebGpuCanvas @ref="_canvas"
+                        CanvasId="@CanvasId"
+                        OnGpuReady="HandleGpuReadyAsync"
+                        OnError="HandleErrorAsync"
+                        OnResize="HandleResizeAsync" />
+    </div>
+
+    <!-- Foreground layer (Z-Index: 1) - HTML Content -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;">
+        <div style="pointer-events: auto;">
+            @ChildContent
+        </div>
+    </div>
+</div>
