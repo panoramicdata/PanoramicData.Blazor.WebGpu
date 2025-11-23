@@ -45,21 +45,19 @@ public interface IPDWebGpuService : IAsyncDisposable
 	/// Checks if WebGPU is supported in the current browser.
 	/// </summary>
 	/// <returns>True if WebGPU is supported; otherwise, false.</returns>
-	Task<bool> CheckSupportAsync();
+	Task<bool> IsSupportedAsync();
 
 	/// <summary>
-	/// Gets browser compatibility information for WebGPU.
+	/// Gets detailed compatibility information about the browser and WebGPU support.
 	/// </summary>
 	/// <returns>Compatibility information.</returns>
 	Task<Interop.WebGpuCompatibilityInfo> GetCompatibilityInfoAsync();
 
 	/// <summary>
-	/// Initializes the WebGPU device with optional configuration.
+	/// Initializes the WebGPU service and acquires the device.
 	/// </summary>
-	/// <param name="powerPreference">Power preference (low-power, high-performance).</param>
-	/// <param name="requiredFeatures">Optional required GPU features.</param>
-	/// <returns>A task representing the asynchronous operation.</returns>
-	Task InitializeAsync(string powerPreference = "high-performance", string[]? requiredFeatures = null);
+	/// <param name="canvasId">Optional canvas ID.</param>
+	Task InitializeAsync(string? canvasId = null);
 
 	/// <summary>
 	/// Ensures the WebGPU device is initialized, initializing it if necessary.

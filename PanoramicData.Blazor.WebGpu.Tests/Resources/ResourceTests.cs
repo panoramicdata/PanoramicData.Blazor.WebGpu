@@ -12,7 +12,7 @@ namespace PanoramicData.Blazor.WebGpu.Tests.Resources;
 /// </summary>
 public class ResourceTests : TestBase
 {
-	private Mock<IJSRuntime> CreateMockJSRuntime()
+	private static Mock<IJSRuntime> CreateMockJSRuntime()
 	{
 		var mockJsRuntime = new Mock<IJSRuntime>();
 		var mockModule = new Mock<IJSObjectReference>();

@@ -37,7 +37,7 @@ public class WebGpuJsInteropTests : TestBase
 	}
 
 	[Fact]
-	public async Task IsSupportedAsync_Should_ThrowPDWebGpuException_When_JsError()
+	public async Task IsSupportedAsync_Should_ReturnFalse_When_JsError()
 	{
 		// Arrange
 		var mockJsRuntime = new Mock<IJSRuntime>();
@@ -55,10 +55,11 @@ public class WebGpuJsInteropTests : TestBase
 
 		var interop = new WebGpuJsInterop(mockJsRuntime.Object);
 
-		// Act & Assert
-		var act = async () => await interop.IsSupportedAsync();
-		await act.Should().ThrowExactlyAsync<PDWebGpuException>()
-			.WithMessage("*WebGPU support*");
+		// Act
+		var isSupported = await interop.IsSupportedAsync();
+
+		// Assert
+		isSupported.Should().BeFalse();
 	}
 
 	[Fact]
@@ -131,7 +132,7 @@ public class WebGpuJsInteropTests : TestBase
 		var interop = new WebGpuJsInterop(mockJsRuntime.Object);
 
 		// Act
-		var deviceInfo = await interop.InitializeAsync();
+		var deviceInfo = await interop.InitializeAsync("test-canvas");
 
 		// Assert
 		deviceInfo.Should().NotBeNull();
@@ -161,7 +162,7 @@ public class WebGpuJsInteropTests : TestBase
 		var interop = new WebGpuJsInterop(mockJsRuntime.Object);
 
 		// Act & Assert
-		var act = async () => await interop.InitializeAsync();
+		var act = async () => await interop.InitializeAsync("test-canvas");
 		await act.Should().ThrowExactlyAsync<PDWebGpuDeviceException>()
 			.WithMessage("*initialize WebGPU device*");
 	}

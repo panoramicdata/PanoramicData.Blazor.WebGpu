@@ -13,7 +13,7 @@ namespace PanoramicData.Blazor.WebGpu.Tests.Shaders;
 /// </summary>
 public class ShaderManagementTests : TestBase
 {
-	private Mock<IJSRuntime> CreateMockJSRuntime()
+	private static Mock<IJSRuntime> CreateMockJSRuntime()
 	{
 		var mockJsRuntime = new Mock<IJSRuntime>();
 		var mockModule = new Mock<IJSObjectReference>();
@@ -25,6 +25,16 @@ public class ShaderManagementTests : TestBase
 		mockModule
 			.Setup(x => x.InvokeAsync<bool>("isSupported", It.IsAny<object[]>()))
 			.ReturnsAsync(true);
+
+		mockModule
+			.Setup(x => x.InvokeAsync<WebGpuCompatibilityInfo>("getCompatibilityInfo", It.IsAny<object[]>()))
+			.ReturnsAsync(new WebGpuCompatibilityInfo
+			{
+				IsSupported = true,
+				UserAgent = "Test Browser",
+				Vendor = "Test",
+				Platform = "Test Platform"
+			});
 
 		mockModule
 			.Setup(x => x.InvokeAsync<WebGpuDeviceInfo>("initializeAsync", It.IsAny<object[]>()))

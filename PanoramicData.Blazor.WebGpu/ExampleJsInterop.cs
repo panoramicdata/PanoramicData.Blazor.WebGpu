@@ -1,4 +1,4 @@
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace PanoramicData.Blazor.WebGpu;
 
@@ -11,21 +11,21 @@ namespace PanoramicData.Blazor.WebGpu;
 
 public class ExampleJsInterop(IJSRuntime jsRuntime) : IAsyncDisposable
 {
-    private readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/PanoramicData.Blazor.WebGpu/exampleJsInterop.js").AsTask());
+	private readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
+			"import", "./_content/PanoramicData.Blazor.WebGpu/exampleJsInterop.js").AsTask());
 
-    public async ValueTask<string> Prompt(string message)
-    {
-        var module = await moduleTask.Value;
-        return await module.InvokeAsync<string>("showPrompt", message);
-    }
+	public async ValueTask<string> Prompt(string message)
+	{
+		var module = await moduleTask.Value;
+		return await module.InvokeAsync<string>("showPrompt", message);
+	}
 
-    public async ValueTask DisposeAsync()
-    {
-        if (moduleTask.IsValueCreated)
-        {
-            var module = await moduleTask.Value;
-            await module.DisposeAsync();
-        }
-    }
+	public async ValueTask DisposeAsync()
+	{
+		if (moduleTask.IsValueCreated)
+		{
+			var module = await moduleTask.Value;
+			await module.DisposeAsync();
+		}
+	}
 }

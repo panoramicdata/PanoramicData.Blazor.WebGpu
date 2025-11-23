@@ -1,0 +1,149 @@
+@page "/camera-demo"
+@inject IPDWebGpuService WebGpuService
+
+<PageTitle>Camera Demo</PageTitle>
+
+<div class="camera-demo-container">
+	<h1>Camera System Demonstration</h1>
+	
+	<div class="demo-info">
+		<p>This page demonstrates the three camera types available in the WebGPU framework. Each camera is a C# class that manages view and projection matrices automatically.</p>
+	</div>
+
+	<div class="demo-grid">
+		<!-- Orbit Camera Section -->
+		<div class="demo-section">
+			<h2>Orbit Camera</h2>
+			<p>Target-based camera with rotation and zoom</p>
+			<div class="camera-details">
+				<h4>Properties:</h4>
+				<ul>
+					<li><strong>Target:</strong> @_orbitCamera.Target</li>
+					<li><strong>Distance:</strong> @_orbitCamera.Distance.ToString("F2")</li>
+					<li><strong>Yaw:</strong> @(_orbitCamera.Yaw * 180 / MathF.PI).ToString("F1")°</li>
+					<li><strong>Pitch:</strong> @(_orbitCamera.Pitch * 180 / MathF.PI).ToString("F1")°</li>
+				</ul>
+				<h4>Methods:</h4>
+				<div class="method-buttons">
+					<button class="btn btn-sm btn-primary" @onclick="() => _orbitCamera.Rotate(0.1f, 0)">Rotate Left</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _orbitCamera.Rotate(-0.1f, 0)">Rotate Right</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _orbitCamera.Rotate(0, 0.1f)">Tilt Up</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _orbitCamera.Rotate(0, -0.1f)">Tilt Down</button>
+					<button class="btn btn-sm btn-secondary" @onclick="() => _orbitCamera.Zoom(-1f)">Zoom In</button>
+					<button class="btn btn-sm btn-secondary" @onclick="() => _orbitCamera.Zoom(1f)">Zoom Out</button>
+				</div>
+			</div>
+			<div class="camera-info">
+				<strong>Use Case:</strong> 3D object inspection, model viewers, product configurators
+			</div>
+		</div>
+
+		<!-- First Person Camera Section -->
+		<div class="demo-section">
+			<h2>First Person Camera</h2>
+			<p>FPS-style camera with WASD movement</p>
+			<div class="camera-details">
+				<h4>Properties:</h4>
+				<ul>
+					<li><strong>Position:</strong> @_firstPersonCamera.Position.ToString("F2")</li>
+					<li><strong>Yaw:</strong> @(_firstPersonCamera.Yaw * 180 / MathF.PI).ToString("F1")°</li>
+					<li><strong>Pitch:</strong> @(_firstPersonCamera.Pitch * 180 / MathF.PI).ToString("F1")°</li>
+					<li><strong>Move Speed:</strong> @_firstPersonCamera.MoveSpeed.ToString("F1") units/sec</li>
+				</ul>
+				<h4>Methods:</h4>
+				<div class="method-buttons">
+					<button class="btn btn-sm btn-primary" @onclick="() => _firstPersonCamera.MoveForward(1f, 0.1f)">Move Forward</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _firstPersonCamera.MoveForward(-1f, 0.1f)">Move Back</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _firstPersonCamera.MoveRight(1f, 0.1f)">Move Right</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _firstPersonCamera.MoveRight(-1f, 0.1f)">Move Left</button>
+					<button class="btn btn-sm btn-secondary" @onclick="() => _firstPersonCamera.Look(50f, 0f)">Look Right</button>
+					<button class="btn btn-sm btn-secondary" @onclick="() => _firstPersonCamera.Look(-50f, 0f)">Look Left</button>
+				</div>
+			</div>
+			<div class="camera-info">
+				<strong>Use Case:</strong> Games, virtual tours, exploration, walkthroughs
+			</div>
+		</div>
+
+		<!-- Orthographic Camera Section -->
+		<div class="demo-section">
+			<h2>Orthographic Camera</h2>
+			<p>2D parallel projection for UI and diagrams</p>
+			<div class="camera-details">
+				<h4>Properties:</h4>
+				<ul>
+					<li><strong>Position:</strong> @_orthoCamera.Position.ToString("F2")</li>
+					<li><strong>Target:</strong> @_orthoCamera.Target.ToString("F2")</li>
+					<li><strong>Bounds:</strong> [@_orthoCamera.Left.ToString("F1"), @_orthoCamera.Right.ToString("F1"), @_orthoCamera.Bottom.ToString("F1"), @_orthoCamera.Top.ToString("F1")]</li>
+					<li><strong>Zoom:</strong> @_orthoCamera.Zoom.ToString("F2")x</li>
+				</ul>
+				<h4>Methods:</h4>
+				<div class="method-buttons">
+					<button class="btn btn-sm btn-primary" @onclick="() => _orthoCamera.Pan(0.5f, 0f)">Pan Right</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _orthoCamera.Pan(-0.5f, 0f)">Pan Left</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _orthoCamera.Pan(0f, 0.5f)">Pan Up</button>
+					<button class="btn btn-sm btn-primary" @onclick="() => _orthoCamera.Pan(0f, -0.5f)">Pan Down</button>
+					<button class="btn btn-sm btn-secondary" @onclick="() => _orthoCamera.Zoom *= 1.2f">Zoom In</button>
+					<button class="btn btn-sm btn-secondary" @onclick="() => _orthoCamera.Zoom /= 1.2f">Zoom Out</button>
+				</div>
+			</div>
+			<div class="camera-info">
+				<strong>Use Case:</strong> 2D graphics, CAD applications, UI overlays, architectural plans
+			</div>
+		</div>
+	</div>
+
+	<div class="documentation">
+		<h3>Camera Features</h3>
+		<ul>
+			<li>Automatic view/projection matrix calculation with lazy evaluation</li>
+			<li>Matrix caching with dirty flags for optimal performance</li>
+			<li>Configurable movement speeds and sensitivities</li>
+			<li>Support for custom FOV, aspect ratio, and clipping planes</li>
+			<li>No manual matrix math required - just set properties and call methods</li>
+		</ul>
+
+		<h3>Code Example</h3>
+		<pre><code>// Create an orbit camera
+var camera = new PDWebGpuOrbitCamera
+{
+    Target = Vector3.Zero,
+    Distance = 5.0f,
+    RotationSpeed = 0.5f
+};
+
+// Rotate the camera
+camera.Rotate(deltaYaw, deltaPitch);
+
+// Get matrices (automatically calculated)
+var viewMatrix = camera.ViewMatrix;
+var projectionMatrix = camera.ProjectionMatrix;
+var viewProjectionMatrix = camera.ViewProjectionMatrix;</code></pre>
+	</div>
+</div>
+
+@code {
+	private PDWebGpuOrbitCamera _orbitCamera = new()
+	{
+		Target = System.Numerics.Vector3.Zero,
+		Distance = 5.0f
+	};
+
+	private PDWebGpuFirstPersonCamera _firstPersonCamera = new()
+	{
+		Position = new System.Numerics.Vector3(0, 0, 5),
+		MoveSpeed = 2.0f
+	};
+
+	private PDWebGpuOrthographicCamera _orthoCamera = new()
+	{
+		Left = -2.0f,
+		Right = 2.0f,
+		Bottom = -2.0f,
+		Top = 2.0f,
+		NearPlane = 0.1f,
+		FarPlane = 100.0f,
+		Position = new System.Numerics.Vector3(0, 0, 10),
+		Target = System.Numerics.Vector3.Zero
+	};
+}

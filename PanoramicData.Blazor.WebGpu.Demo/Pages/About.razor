@@ -1,0 +1,123 @@
+@page "/about"
+
+<PageTitle>About - WebGPU Framework</PageTitle>
+
+<div class="about-container">
+	<h1>PanoramicData.Blazor.WebGpu</h1>
+	<p class="lead">A comprehensive WebGPU framework for Blazor WebAssembly</p>
+
+	<section class="about-section">
+		<h2>What is WebGPU?</h2>
+		<p>
+			WebGPU is a modern graphics API that provides low-level, high-performance access to GPU capabilities
+			directly from web browsers. It enables developers to create stunning 3D graphics, complex visualizations,
+			and GPU-accelerated computations with performance approaching native applications.
+		</p>
+	</section>
+
+	<section class="about-section">
+		<h2>Framework Features</h2>
+		<div class="feature-grid">
+			<div class="feature-card">
+				<h3><span class="oi oi-code"></span> C# First</h3>
+				<p>Write GPU-accelerated applications using pure C# with no JavaScript knowledge required.</p>
+			</div>
+			<div class="feature-card">
+				<h3><span class="oi oi-layers"></span> Component-Based</h3>
+				<p>Blazor components for cameras, containers, and performance metrics with automatic lifecycle management.</p>
+			</div>
+			<div class="feature-card">
+				<h3><span class="oi oi-flash"></span> Hot-Reload</h3>
+				<p>Edit and reload WGSL shaders in real-time during development with instant validation feedback.</p>
+			</div>
+			<div class="feature-card">
+				<h3><span class="oi oi-dashboard"></span> Performance Metrics</h3>
+				<p>Built-in FPS monitoring, frame timing, and custom metric tracking.</p>
+			</div>
+			<div class="feature-card">
+				<h3><span class="oi oi-camera-slr"></span> Camera System</h3>
+				<p>Orbit, first-person, and orthographic cameras with automatic matrix calculations.</p>
+			</div>
+			<div class="feature-card">
+				<h3><span class="oi oi-shield"></span> Error Handling</h3>
+				<p>Comprehensive error messages and browser compatibility detection.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="about-section">
+		<h2>Browser Compatibility</h2>
+		<div class="compatibility-table">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Browser</th>
+						<th>Minimum Version</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Google Chrome</td>
+						<td>113+</td>
+						<td><span class="badge bg-success">Supported</span></td>
+					</tr>
+					<tr>
+						<td>Microsoft Edge</td>
+						<td>113+</td>
+						<td><span class="badge bg-success">Supported</span></td>
+					</tr>
+					<tr>
+						<td>Opera</td>
+						<td>99+</td>
+						<td><span class="badge bg-success">Supported</span></td>
+					</tr>
+					<tr>
+						<td>Firefox</td>
+						<td>Latest</td>
+						<td><span class="badge bg-warning">Experimental</span></td>
+					</tr>
+					<tr>
+						<td>Safari</td>
+						<td>Technology Preview</td>
+						<td><span class="badge bg-warning">Experimental</span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section class="about-section">
+		<h2>Technical Stack</h2>
+		<ul>
+			<li><strong>Target Framework:</strong> .NET 10</li>
+			<li><strong>Runtime:</strong> Blazor WebAssembly</li>
+			<li><strong>Graphics API:</strong> WebGPU</li>
+			<li><strong>Shader Language:</strong> WGSL (WebGPU Shading Language)</li>
+			<li><strong>License:</strong> MIT</li>
+		</ul>
+	</section>
+
+	<section class="about-section">
+		<h2>Getting Started</h2>
+		<ol>
+			<li>Install the NuGet package: <code>PanoramicData.Blazor.WebGpu</code></li>
+			<li>Register services in <code>Program.cs</code>:
+				<pre><code>builder.Services.AddPDWebGpu();</code></pre>
+			</li>
+			<li>Add a WebGPU container to your Razor page:
+				<pre><code>&lt;PDWebGpuContainer FrameRateMode="FrameRateMode.Fixed" TargetFrameRate="60"&gt;
+    &lt;!-- Your WebGPU content here --&gt;
+&lt;/PDWebGpuContainer&gt;</code></pre>
+			</li>
+		</ol>
+	</section>
+
+	<footer class="about-footer">
+		<p>
+			&copy; 2025 Panoramic Data Limited. All rights reserved.<br />
+			<a href="https://github.com/panoramicdata" target="_blank">GitHub</a> |
+			<a href="https://panoramicdata.com" target="_blank">Website</a>
+		</p>
+	</footer>
+</div>

@@ -33,6 +33,6 @@ public class PDWebGpuDeviceException : PDWebGpuException
 	/// <summary>
 	/// Gets suggested recovery actions for device errors.
 	/// </summary>
-	public string RecoverySuggestion => "Try refreshing the page or restarting your browser. " +
+	public static string RecoverySuggestion => "Try refreshing the page or restarting your browser. " +
 		"If the problem persists, check if your GPU drivers are up to date.";
 }

@@ -1,7 +1,141 @@
-﻿@page "/"
+@page "/"
+@inject IPDWebGpuService WebGpuService
+@implements IDisposable
 
-<PageTitle>Home</PageTitle>
+<PageTitle>WebGPU Shader Editor - Demo</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="shader-editor-container">
+	<div class="toolbar">
+		<h1>WebGPU Shader Editor Demo</h1>
+		<div class="toolbar-actions">
+			<button class="btn btn-primary" @onclick="CompileShader">
+				<span class="oi oi-flash"></span> Compile Shader
+			</button>
+			<button class="btn btn-secondary" @onclick="TogglePerformanceMetrics">
+				<span class="oi oi-dashboard"></span> @(_showPerformance ? "Hide" : "Show") Metrics
+			</button>
+			<select class="form-select" @onchange="LoadExampleShader" style="width: auto; display: inline-block;">
+				<option value="">Load Example...</option>
+				@foreach (var example in _exampleShaders)
+				{
+					<option value="@example.Key">@example.Key</option>
+				}
+			</select>
+		</div>
+	</div>
 
-Welcome to your new app.
+	<div class="split-view">
+		<!-- Left Pane: Editor -->
+		<div class="editor-pane">
+			<div class="pane-header">
+				<h2>WGSL Shader Editor</h2>
+				@if (_compilationError != null)
+				{
+					<div class="alert alert-danger mt-2">
+						<strong>Compilation Error:</strong>
+						<pre>@_compilationError</pre>
+					</div>
+				}
+				@if (_compilationSuccess)
+				{
+					<div class="alert alert-success mt-2">
+						<strong>Success!</strong> Shader compiled successfully.
+					</div>
+				}
+			</div>
+			<div class="editor-content">
+				<textarea class="wgsl-editor" @bind="_currentShaderCode" @bind:event="oninput" spellcheck="false"></textarea>
+			</div>
+		</div>
+
+		<!-- Resize Handle -->
+		<div class="resize-handle"></div>
+
+		<!-- Right Pane: WebGPU Output -->
+		<div class="output-pane">
+			<div class="pane-header">
+				<h2>WebGPU Output</h2>
+				<div class="camera-controls">
+					<label>
+						<input type="radio" name="camera" @onchange="() => SetCameraMode(CameraMode.Orbit)" checked="@(_cameraMode == CameraMode.Orbit)" />
+						Orbit
+					</label>
+					<label>
+						<input type="radio" name="camera" @onchange="() => SetCameraMode(CameraMode.FirstPerson)" checked="@(_cameraMode == CameraMode.FirstPerson)" />
+						First Person
+					</label>
+					<label>
+						<input type="radio" name="camera" @onchange="() => SetCameraMode(CameraMode.Orthographic)" checked="@(_cameraMode == CameraMode.Orthographic)" />
+						Orthographic
+					</label>
+				</div>
+			</div>
+			<div class="webgpu-output">
+				@if (_webGpuSupported == false)
+				{
+					<div class="alert alert-warning">
+						<h3>?? WebGPU Not Supported</h3>
+						<p>Your browser does not support WebGPU. Please use Chrome 113+, Edge 113+, or Opera 99+.</p>
+					</div>
+				}
+				else if (_deviceError != null)
+				{
+					<div class="alert alert-danger">
+						<h3>?? WebGPU Device Error</h3>
+						<pre>@_deviceError</pre>
+					</div>
+				}
+				else
+				{
+					<PDWebGpuContainer @ref="_container"
+									   FrameRateMode="FrameRateMode.Fixed"
+									   TargetFrameRate="60"
+									   PauseWhenInactive="true"
+									   OnFrame="OnFrame"
+									   OnGpuReady="OnGpuReady"
+									   OnError="OnError">
+						
+						@* Performance overlay *@
+						@if (_showPerformance)
+						{
+							<PDWebGpuPerformanceDisplay Options="_performanceOptions" />
+						}
+
+						@* Camera info display *@
+						<div class="camera-overlay">
+							<div class="camera-info-badge">
+								Camera: @_cameraMode
+								@if (_activeCamera != null)
+								{
+									<br />
+									<span>View Matrix: Calculated</span>
+								}
+							</div>
+						</div>
+					</PDWebGpuContainer>
+				}
+			</div>
+		</div>
+	</div>
+
+	<div class="info-panel">
+		<h3>Instructions</h3>
+		<ul>
+			<li>Edit WGSL shader code in the left pane</li>
+			<li>Click "Compile Shader" to compile and apply changes</li>
+			<li>Select example shaders from the dropdown to learn WGSL syntax</li>
+			<li>Toggle performance metrics to monitor FPS and frame timing</li>
+			<li>Switch between camera modes to explore different viewing perspectives</li>
+			<li><strong>Orbit Camera:</strong> Target-based rotation with configurable distance</li>
+			<li><strong>First Person:</strong> WASD movement with mouse look</li>
+			<li><strong>Orthographic:</strong> 2D parallel projection view</li>
+		</ul>
+
+		@if (_isCompiling)
+		{
+			<div class="spinner-border text-primary" role="status">
+				<span class="visually-hidden">Compiling...</span>
+			</div>
+		}
+	</div>
+</div>

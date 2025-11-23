@@ -7,6 +7,7 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
+    <File Path="global.json" />
     <File Path="MASTER_PLAN.md" />
   </Folder>
   <Project Path="PanoramicData.Blazor.WebGpu.Demo/PanoramicData.Blazor.WebGpu.Demo.csproj" />

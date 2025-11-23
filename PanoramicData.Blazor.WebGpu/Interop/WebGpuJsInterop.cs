@@ -48,14 +48,14 @@ internal sealed class WebGpuJsInterop : IAsyncDisposable
 			var module = await _moduleTask.Value;
 			return await module.InvokeAsync<bool>("isSupported");
 		}
-		catch (Exception ex)
+		catch
 		{
-			throw new PDWebGpuException("Failed to check WebGPU support", ex);
+			return false;
 		}
 	}
 
 	/// <summary>
-	/// Gets browser compatibility information for WebGPU.
+	/// Gets detailed compatibility information about the browser and WebGPU support.
 	/// </summary>
 	/// <returns>Compatibility information.</returns>
 	public async ValueTask<WebGpuCompatibilityInfo> GetCompatibilityInfoAsync()
@@ -67,21 +67,30 @@ internal sealed class WebGpuJsInterop : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			throw new PDWebGpuException("Failed to get compatibility information", ex);
+			return new WebGpuCompatibilityInfo
+			{
+				IsSupported = false,
+				ErrorMessage = $"Failed to detect WebGPU support: {ex.Message}",
+				UserAgent = "unknown",
+				Vendor = "unknown",
+				Platform = "unknown"
+			};
 		}
 	}
 
 	/// <summary>
-	/// Initializes the WebGPU adapter and device.
+	/// Initializes the WebGPU device for the specified canvas.
 	/// </summary>
-	/// <param name="options">Initialization options.</param>
+	/// <param name="canvasId">The canvas element ID.</param>
 	/// <returns>Device information.</returns>
-	public async ValueTask<WebGpuDeviceInfo> InitializeAsync(WebGpuInitOptions? options = null)
+	/// <exception cref="PDWebGpuNotSupportedException">Thrown when WebGPU is not supported.</exception>
+	/// <exception cref="PDWebGpuDeviceException">Thrown when device initialization fails.</exception>
+	public async ValueTask<WebGpuDeviceInfo> InitializeAsync(string canvasId)
 	{
 		try
 		{
 			var module = await _moduleTask.Value;
-			return await module.InvokeAsync<WebGpuDeviceInfo>("initializeAsync", options ?? new WebGpuInitOptions());
+			return await module.InvokeAsync<WebGpuDeviceInfo>("initializeAsync", canvasId);
 		}
 		catch (JSException ex)
 		{
@@ -331,37 +340,6 @@ internal class CanvasContextResult
 	/// Gets or sets the context ID.
 	/// </summary>
 	public string ContextId { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// WebGPU compatibility information.
-/// </summary>
-public class WebGpuCompatibilityInfo
-{
-	/// <summary>
-	/// Gets or sets whether WebGPU is supported.
-	/// </summary>
-	public bool IsSupported { get; set; }
-
-	/// <summary>
-	/// Gets or sets the user agent string.
-	/// </summary>
-	public string UserAgent { get; set; } = string.Empty;
-
-	/// <summary>
-	/// Gets or sets the browser vendor.
-	/// </summary>
-	public string Vendor { get; set; } = string.Empty;
-
-	/// <summary>
-	/// Gets or sets the platform.
-	/// </summary>
-	public string Platform { get; set; } = string.Empty;
-
-	/// <summary>
-	/// Gets or sets the error message if WebGPU is not supported.
-	/// </summary>
-	public string? ErrorMessage { get; set; }
 }
 
 /// <summary>

@@ -32,7 +32,7 @@ public class PDWebGpuNotSupportedException : PDWebGpuException
 	/// <summary>
 	/// Gets suggested actions for enabling WebGPU support.
 	/// </summary>
-	public string Suggestion => "Please use one of the following browsers with WebGPU enabled:\n" +
+	public static string Suggestion => "Please use one of the following browsers with WebGPU enabled:\n" +
 		"- Chrome 113 or later\n" +
 		"- Edge 113 or later\n" +
 		"- Opera 99 or later\n\n" +

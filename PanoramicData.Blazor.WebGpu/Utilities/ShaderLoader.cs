@@ -88,7 +88,7 @@ public class ShaderLoader
 		}
 
 		var shader = await LoadShaderAsync(name, wgslCode, validate);
-		
+
 		// Raise reload event
 		ShaderReloaded?.Invoke(this, new ShaderReloadedEventArgs(name, shader));
 

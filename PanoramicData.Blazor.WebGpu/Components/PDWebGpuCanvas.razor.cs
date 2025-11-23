@@ -61,8 +61,11 @@ public partial class PDWebGpuCanvas : PDWebGpuComponentBase
 	{
 		try
 		{
-			// Ensure WebGPU service is initialized
-			await WebGpuService.EnsureInitializedAsync();
+			// Ensure WebGPU service is initialized with the correct canvas ID
+			if (!WebGpuService.IsInitialized)
+			{
+				await WebGpuService.InitializeAsync(CanvasId);
+			}
 
 			// Get the canvas context
 			_contextId = await WebGpuService.GetCanvasContextAsync(CanvasId);

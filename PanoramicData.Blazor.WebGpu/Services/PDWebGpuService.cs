@@ -47,38 +47,43 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 	public event EventHandler<PDWebGpuErrorEventArgs>? Error;
 
 	/// <inheritdoc/>
-	public async Task<bool> CheckSupportAsync()
+	public async Task<bool> IsSupportedAsync()
 	{
 		try
 		{
-			_isSupported = await _interop.IsSupportedAsync();
-			return _isSupported;
+			// Don't use cached value - always check fresh
+			var isSupported = await _interop.IsSupportedAsync();
+			_isSupported = isSupported;
+			return isSupported;
 		}
 		catch (Exception ex)
 		{
-			OnError(new PDWebGpuErrorEventArgs(ex));
+			OnError(new PDWebGpuErrorEventArgs(new PDWebGpuException("Failed to check WebGPU support", ex)));
+			_isSupported = false;
 			return false;
 		}
 	}
 
 	/// <inheritdoc/>
-	public async Task<WebGpuCompatibilityInfo> GetCompatibilityInfoAsync()
+	public async Task<Interop.WebGpuCompatibilityInfo> GetCompatibilityInfoAsync()
 	{
 		try
 		{
-			_compatibilityInfo = await _interop.GetCompatibilityInfoAsync();
-			_isSupported = _compatibilityInfo.IsSupported;
-			return _compatibilityInfo;
+			// Always get fresh compatibility info
+			var compatInfo = await _interop.GetCompatibilityInfoAsync();
+			_compatibilityInfo = compatInfo;
+			_isSupported = compatInfo.IsSupported;
+			return compatInfo;
 		}
 		catch (Exception ex)
 		{
-			OnError(new PDWebGpuErrorEventArgs(ex));
+			OnError(new PDWebGpuErrorEventArgs(new PDWebGpuException("Failed to get compatibility information", ex)));
 			throw;
 		}
 	}
 
 	/// <inheritdoc/>
-	public async Task InitializeAsync(string powerPreference = "high-performance", string[]? requiredFeatures = null)
+	public async Task InitializeAsync(string? canvasId = null)
 	{
 		if (_isInitialized)
 		{
@@ -87,38 +92,30 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 
 		try
 		{
-			// Check support first
-			if (!_isSupported)
+			// Check WebGPU support first
+			var compatibilityInfo = await _interop.GetCompatibilityInfoAsync();
+			if (!compatibilityInfo.IsSupported)
 			{
-				await CheckSupportAsync();
+				throw new PDWebGpuNotSupportedException(compatibilityInfo);
 			}
 
-			if (!_isSupported)
-			{
-				_compatibilityInfo ??= await GetCompatibilityInfoAsync();
-				throw new PDWebGpuNotSupportedException(_compatibilityInfo);
-			}
-
-			// Initialize the device
-			var options = new WebGpuInitOptions
-			{
-				PowerPreference = powerPreference,
-				RequiredFeatures = requiredFeatures ?? []
-			};
-
-			_deviceInfo = await _interop.InitializeAsync(options);
+			// Initialize device
+			var deviceInfo = await _interop.InitializeAsync(canvasId ?? "webgpu-canvas");
+			_deviceInfo = deviceInfo;
+			_compatibilityInfo = compatibilityInfo;
+			_isSupported = true;
 			_isInitialized = true;
 
-			// Raise the DeviceReady event
-			OnDeviceReady();
+			// Raise DeviceReady event
+			DeviceReady?.Invoke(this, EventArgs.Empty);
 		}
-		catch (PDWebGpuException)
+		catch (PDWebGpuNotSupportedException)
 		{
-			throw;
+			throw; // Re-throw with compatibility info
 		}
 		catch (Exception ex)
 		{
-			OnError(new PDWebGpuErrorEventArgs(ex));
+			Error?.Invoke(this, new PDWebGpuErrorEventArgs(ex));
 			throw new PDWebGpuDeviceException("Failed to initialize WebGPU device", ex);
 		}
 	}

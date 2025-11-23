@@ -80,20 +80,61 @@ class WebGpuInterop {
     }
 
     /**
-     * Get detailed browser compatibility information
-     * @returns {object} Browser and WebGPU support details
+     * Get detailed compatibility information about the browser and WebGPU support
+     * @returns {object} Compatibility information including browser details
      */
-    getCompatibilityInfo() {
+    async getCompatibilityInfo() {
         const info = {
             isSupported: this.isSupported(),
-            userAgent: navigator.userAgent,
-            vendor: navigator.vendor,
-            platform: navigator.platform
+            userAgent: navigator.userAgent || '',
+            vendor: navigator.vendor || '',
+            platform: navigator.platform || '',
+            errorMessage: null,
+            browserName: null,
+            browserVersion: null,
+            supportsWithFlags: false
         };
 
+        // Detect browser
+        const ua = navigator.userAgent.toLowerCase();
+        if (ua.includes('chrome') && !ua.includes('edge')) {
+            info.browserName = 'Chrome';
+            const match = ua.match(/chrome\/(\d+)/);
+            info.browserVersion = match ? match[1] : 'unknown';
+            info.supportsWithFlags = parseInt(info.browserVersion) >= 113;
+        } else if (ua.includes('edg/')) {
+            info.browserName = 'Edge';
+            const match = ua.match(/edg\/(\d+)/);
+            info.browserVersion = match ? match[1] : 'unknown';
+            info.supportsWithFlags = parseInt(info.browserVersion) >= 113;
+        } else if (ua.includes('opr/') || ua.includes('opera')) {
+            info.browserName = 'Opera';
+            const match = ua.match(/(?:opr|opera)\/(\d+)/);
+            info.browserVersion = match ? match[1] : 'unknown';
+            info.supportsWithFlags = parseInt(info.browserVersion) >= 99;
+        } else if (ua.includes('firefox')) {
+            info.browserName = 'Firefox';
+            const match = ua.match(/firefox\/(\d+)/);
+            info.browserVersion = match ? match[1] : 'unknown';
+            info.supportsWithFlags = true; // May need flags
+            info.errorMessage = 'Firefox requires enabling WebGPU in about:config (dom.webgpu.enabled)';
+        } else if (ua.includes('safari') && !ua.includes('chrome')) {
+            info.browserName = 'Safari';
+            const match = ua.match(/version\/(\d+)/);
+            info.browserVersion = match ? match[1] : 'unknown';
+            info.supportsWithFlags = true; // Technology Preview
+            info.errorMessage = 'Safari requires Safari Technology Preview with WebGPU enabled in Develop menu';
+        } else {
+            info.browserName = 'Unknown';
+            info.browserVersion = 'unknown';
+        }
+
+        // Set error message if not supported
         if (!info.isSupported) {
-            info.errorMessage = 'WebGPU is not supported in this browser. ' +
-                'Please use Chrome 113+, Edge 113+, or Opera 99+ with WebGPU enabled.';
+            if (!info.errorMessage) {
+                info.errorMessage = `WebGPU is not available in ${info.browserName} ${info.browserVersion}. ` +
+                    `Please use Chrome 113+, Edge 113+, or Opera 99+.`;
+            }
         }
 
         return info;
@@ -101,10 +142,10 @@ class WebGpuInterop {
 
     /**
      * Initialize WebGPU adapter and device
-     * @param {object} options - Initialization options (powerPreference, etc.)
-     * @returns {Promise<object>} Device information
+     * @param {string} canvasId - The ID of the canvas element
+     * @returns {Promise<object>} Device info including adapter and device details
      */
-    async initializeAsync(options = {}) {
+    async initializeAsync(canvasId) {
         try {
             if (!this.isSupported()) {
                 throw new Error('WebGPU is not supported in this browser');
@@ -112,7 +153,7 @@ class WebGpuInterop {
 
             // Request adapter
             const adapterOptions = {
-                powerPreference: options.powerPreference || 'high-performance'
+                powerPreference: 'high-performance'
             };
 
             this.adapter = await navigator.gpu.requestAdapter(adapterOptions);
@@ -122,8 +163,8 @@ class WebGpuInterop {
 
             // Request device
             const deviceDescriptor = {
-                requiredFeatures: options.requiredFeatures || [],
-                requiredLimits: options.requiredLimits || {}
+                requiredFeatures: [],
+                requiredLimits: {}
             };
 
             this.device = await this.adapter.requestDevice(deviceDescriptor);
@@ -141,6 +182,9 @@ class WebGpuInterop {
             this.device.addEventListener('uncapturederror', (event) => {
                 console.error('WebGPU uncaptured error:', event.error);
             });
+
+            // Initialize canvas context
+            this.getCanvasContext(canvasId);
 
             return {
                 adapterInfo: {
@@ -333,8 +377,58 @@ class WebGpuInterop {
     }
 }
 
-// Create and export the global instance
-window.webGpuInterop = new WebGpuInterop();
+// Create the global instance
+const webGpuInterop = new WebGpuInterop();
 
-// Export for ES6 module usage
-export default window.webGpuInterop;
+// Export module functions for Blazor JavaScript interop
+export function isSupported() {
+    return webGpuInterop.isSupported();
+}
+
+export async function getCompatibilityInfo() {
+    return await webGpuInterop.getCompatibilityInfo();
+}
+
+export async function initializeAsync(canvasId) {
+    return await webGpuInterop.initializeAsync(canvasId);
+}
+
+export function getCanvasContext(canvasId) {
+    return webGpuInterop.getCanvasContext(canvasId);
+}
+
+export function configureCanvasContext(contextId, config) {
+    webGpuInterop.configureCanvasContext(contextId, config);
+}
+
+export function getCurrentTexture(contextId) {
+    return webGpuInterop.getCurrentTexture(contextId);
+}
+
+export async function createShaderModuleAsync(wgslCode) {
+    return await webGpuInterop.createShaderModuleAsync(wgslCode);
+}
+
+export function submitCommandBuffers(commandBufferIds) {
+    webGpuInterop.submitCommandBuffers(commandBufferIds);
+}
+
+export function releaseResource(resourceId) {
+    webGpuInterop.releaseResource(resourceId);
+}
+
+export function registerVisibilityCallback(dotNetRef) {
+    return webGpuInterop.registerVisibilityCallback(dotNetRef);
+}
+
+export function unregisterVisibilityCallback(callbackId) {
+    webGpuInterop.unregisterVisibilityCallback(callbackId);
+}
+
+export function isPageVisible() {
+    return webGpuInterop.isPageVisible();
+}
+
+export function dispose() {
+    webGpuInterop.dispose();
+}

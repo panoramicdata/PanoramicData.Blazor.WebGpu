@@ -41,8 +41,8 @@ public class ExceptionTests : TestBase
 
 		// Assert
 		exception.Should().NotBeNull();
-		exception.RecoverySuggestion.Should().NotBeNullOrEmpty();
-		exception.RecoverySuggestion.Should().Contain("refresh");
+		PDWebGpuDeviceException.RecoverySuggestion.Should().NotBeNullOrEmpty();
+		PDWebGpuDeviceException.RecoverySuggestion.Should().Contain("refresh");
 	}
 
 	[Fact]
@@ -111,8 +111,8 @@ fn main(pos: vec3<f32>) -> @builtin(position) vec4<f32> {
 		// Assert
 		exception.Should().NotBeNull();
 		exception.Message.Should().Contain("not supported");
-		exception.Suggestion.Should().Contain("Chrome");
-		exception.Suggestion.Should().Contain("Edge");
+		PDWebGpuNotSupportedException.Suggestion.Should().Contain("Chrome");
+		PDWebGpuNotSupportedException.Suggestion.Should().Contain("Edge");
 	}
 
 	[Fact]

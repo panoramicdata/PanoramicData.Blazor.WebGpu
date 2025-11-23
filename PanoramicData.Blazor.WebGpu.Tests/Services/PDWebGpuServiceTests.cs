@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 using Moq;
 using PanoramicData.Blazor.WebGpu.Interop;
 using PanoramicData.Blazor.WebGpu.Services;
@@ -12,7 +11,7 @@ namespace PanoramicData.Blazor.WebGpu.Tests.Services;
 /// </summary>
 public class PDWebGpuServiceTests : TestBase
 {
-	private Mock<IJSRuntime> CreateMockJSRuntime(bool isSupported = true)
+	private static Mock<IJSRuntime> CreateMockJSRuntime(bool isSupported = true)
 	{
 		var mockJsRuntime = new Mock<IJSRuntime>();
 		var mockModule = new Mock<IJSObjectReference>();
@@ -72,14 +71,14 @@ public class PDWebGpuServiceTests : TestBase
 	}
 
 	[Fact]
-	public async Task CheckSupportAsync_Should_ReturnTrue_When_WebGpuSupported()
+	public async Task IsSupportedAsync_Should_ReturnTrue_When_WebGpuSupported()
 	{
 		// Arrange
 		var mockJsRuntime = CreateMockJSRuntime(true);
 		var service = new PDWebGpuService(mockJsRuntime.Object);
 
 		// Act
-		var isSupported = await service.CheckSupportAsync();
+		var isSupported = await service.IsSupportedAsync();
 
 		// Assert
 		isSupported.Should().BeTrue();
@@ -87,14 +86,14 @@ public class PDWebGpuServiceTests : TestBase
 	}
 
 	[Fact]
-	public async Task CheckSupportAsync_Should_ReturnFalse_When_WebGpuNotSupported()
+	public async Task IsSupportedAsync_Should_ReturnFalse_When_WebGpuNotSupported()
 	{
 		// Arrange
 		var mockJsRuntime = CreateMockJSRuntime(false);
 		var service = new PDWebGpuService(mockJsRuntime.Object);
 
 		// Act
-		var isSupported = await service.CheckSupportAsync();
+		var isSupported = await service.IsSupportedAsync();
 
 		// Assert
 		isSupported.Should().BeFalse();
@@ -378,8 +377,19 @@ public class PDWebGpuServiceTests : TestBase
 				It.IsAny<object[]>()))
 			.ReturnsAsync(mockModule.Object);
 
+		// Setup GetCompatibilityInfoAsync to succeed
 		mockModule
-			.Setup(x => x.InvokeAsync<bool>("isSupported", It.IsAny<object[]>()))
+			.Setup(x => x.InvokeAsync<WebGpuCompatibilityInfo>("getCompatibilityInfo", It.IsAny<object[]>()))
+			.ReturnsAsync(new WebGpuCompatibilityInfo { IsSupported = true });
+
+		// Setup InitializeAsync to succeed
+		mockModule
+			.Setup(x => x.InvokeAsync<WebGpuDeviceInfo>("initializeAsync", It.IsAny<object[]>()))
+			.ReturnsAsync(new WebGpuDeviceInfo { AdapterInfo = new AdapterInfo { Vendor = "Test" } });
+
+		// Setup GetCanvasContextAsync to fail
+		mockModule
+			.Setup(x => x.InvokeAsync<CanvasContextResult>("getCanvasContext", It.IsAny<object[]>()))
 			.ThrowsAsync(new JSException("Test error"));
 
 		var service = new PDWebGpuService(mockJsRuntime.Object);
@@ -387,8 +397,17 @@ public class PDWebGpuServiceTests : TestBase
 
 		service.Error += (s, e) => errorArgs = e;
 
+		await service.InitializeAsync();
+
 		// Act
-		await service.CheckSupportAsync();
+		try
+		{
+			await service.GetCanvasContextAsync("test-canvas");
+		}
+		catch
+		{
+			// Expected exception
+		}
 
 		// Assert
 		errorArgs.Should().NotBeNull();
