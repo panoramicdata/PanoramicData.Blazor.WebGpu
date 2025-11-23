@@ -59,7 +59,7 @@ public class SmokeTests : TestBase
 		// This test verifies that test geometry data is available
 		Infrastructure.Utilities.TestData.TriangleVertices.Should().NotBeNull();
 		Infrastructure.Utilities.TestData.TriangleVertices.Length.Should().Be(9); // 3 vertices * 3 components
-		
+
 		Infrastructure.Utilities.TestData.CubeVertices.Should().NotBeNull();
 		Infrastructure.Utilities.TestData.CubeIndices.Should().NotBeNull();
 	}
@@ -98,7 +98,8 @@ public class SmokeTests : TestBase
 		{
 			await Task.Delay(50);
 			flag = true;
-		});
+		},
+		CancellationToken);
 
 		var result = await Infrastructure.Utilities.TestHelpers.WaitForConditionAsync(
 			() => flag,
@@ -119,7 +120,8 @@ public class SmokeTests : TestBase
 		try
 		{
 			File.Exists(path).Should().BeTrue();
-			var readContent = await File.ReadAllTextAsync(path);
+			var readContent = await File.ReadAllTextAsync(path,
+			CancellationToken);
 			readContent.Should().Be(content);
 		}
 		finally

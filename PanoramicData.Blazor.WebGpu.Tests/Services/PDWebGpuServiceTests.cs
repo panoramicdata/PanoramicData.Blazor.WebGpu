@@ -11,6 +11,8 @@ namespace PanoramicData.Blazor.WebGpu.Tests.Services;
 /// </summary>
 public class PDWebGpuServiceTests : TestBase
 {
+	private static readonly string[] DepthClipControlArray = new[] { "depth-clip-control" };
+
 	private static Mock<IJSRuntime> CreateMockJSRuntime(bool isSupported = true)
 	{
 		var mockJsRuntime = new Mock<IJSRuntime>();
@@ -49,7 +51,7 @@ public class PDWebGpuServiceTests : TestBase
 					Vendor = "Test Vendor",
 					Device = "Test Device"
 				},
-				Features = new[] { "depth-clip-control" }
+				Features = DepthClipControlArray
 			});
 
 		return mockJsRuntime;

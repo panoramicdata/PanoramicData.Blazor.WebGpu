@@ -40,14 +40,16 @@ public class PDWebGpuBuffer : IAsyncDisposable, IDisposable
 	/// </summary>
 	/// <param name="service">The WebGPU service.</param>
 	/// <param name="resourceId">The resource ID from JavaScript.</param>
-	/// <param name="bufferType">The type of buffer.</param>
 	/// <param name="size">The size of the buffer in bytes.</param>
-	internal PDWebGpuBuffer(Services.IPDWebGpuService service, int resourceId, BufferType bufferType, long size)
+	/// <param name="bufferType">The type of buffer.</param>
+	/// <param name="name">Optional name for debugging purposes.</param>
+	internal PDWebGpuBuffer(Services.IPDWebGpuService service, int resourceId, long size, BufferType bufferType, string? name = null)
 	{
 		_service = service ?? throw new ArgumentNullException(nameof(service));
 		_resourceId = resourceId;
-		BufferType = bufferType;
 		Size = size;
+		BufferType = bufferType;
+		Name = name;
 	}
 
 	/// <summary>
@@ -61,6 +63,11 @@ public class PDWebGpuBuffer : IAsyncDisposable, IDisposable
 	public long Size { get; }
 
 	/// <summary>
+	/// Gets the optional buffer name for debugging.
+	/// </summary>
+	public string? Name { get; }
+
+	/// <summary>
 	/// Gets the resource ID.
 	/// </summary>
 	public int ResourceId => _resourceId;
@@ -69,6 +76,33 @@ public class PDWebGpuBuffer : IAsyncDisposable, IDisposable
 	/// Gets whether the buffer has been disposed.
 	/// </summary>
 	public bool IsDisposed => _disposed;
+
+	/// <summary>
+	/// Updates the buffer data.
+	/// </summary>
+	/// <param name="data">The new buffer data.</param>
+	/// <param name="offset">Optional offset in bytes.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task UpdateAsync(byte[] data, long offset = 0)
+	{
+		if (_disposed)
+		{
+			throw new ObjectDisposedException(nameof(PDWebGpuBuffer));
+		}
+
+		if (data == null || data.Length == 0)
+		{
+			throw new ArgumentException("Buffer data cannot be null or empty", nameof(data));
+		}
+
+		if (offset < 0 || offset + data.Length > Size)
+		{
+			throw new ArgumentOutOfRangeException(nameof(offset), "Offset and data length exceed buffer size");
+		}
+
+		// TODO: Implement JavaScript interop for buffer update
+		await Task.CompletedTask; // Placeholder
+	}
 
 	/// <summary>
 	/// Disposes the buffer synchronously.

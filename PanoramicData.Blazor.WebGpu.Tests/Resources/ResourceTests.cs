@@ -45,7 +45,7 @@ public class ResourceTests : TestBase
 		var service = new PDWebGpuService(mockJs.Object);
 
 		// Act
-		var buffer = new PDWebGpuBuffer(service, 42, BufferType.Vertex, 1024);
+		var buffer = new PDWebGpuBuffer(service, 42, 1024, BufferType.Vertex);
 
 		// Assert
 		buffer.Should().NotBeNull();
@@ -63,16 +63,16 @@ public class ResourceTests : TestBase
 		var service = new PDWebGpuService(mockJs.Object);
 
 		// Act & Assert
-		var vertexBuffer = new PDWebGpuBuffer(service, 1, BufferType.Vertex, 100);
+		var vertexBuffer = new PDWebGpuBuffer(service, 1, 100, BufferType.Vertex);
 		vertexBuffer.BufferType.Should().Be(BufferType.Vertex);
 
-		var indexBuffer = new PDWebGpuBuffer(service, 2, BufferType.Index, 200);
+		var indexBuffer = new PDWebGpuBuffer(service, 2, 200, BufferType.Index);
 		indexBuffer.BufferType.Should().Be(BufferType.Index);
 
-		var uniformBuffer = new PDWebGpuBuffer(service, 3, BufferType.Uniform, 300);
+		var uniformBuffer = new PDWebGpuBuffer(service, 3, 300, BufferType.Uniform);
 		uniformBuffer.BufferType.Should().Be(BufferType.Uniform);
 
-		var storageBuffer = new PDWebGpuBuffer(service, 4, BufferType.Storage, 400);
+		var storageBuffer = new PDWebGpuBuffer(service, 4, 400, BufferType.Storage);
 		storageBuffer.BufferType.Should().Be(BufferType.Storage);
 	}
 
@@ -82,7 +82,7 @@ public class ResourceTests : TestBase
 		// Arrange
 		var mockJs = CreateMockJSRuntime();
 		var service = new PDWebGpuService(mockJs.Object);
-		var buffer = new PDWebGpuBuffer(service, 42, BufferType.Vertex, 1024);
+		var buffer = new PDWebGpuBuffer(service, 42, 1024, BufferType.Vertex);
 
 		// Act
 		await buffer.DisposeAsync();
@@ -97,7 +97,7 @@ public class ResourceTests : TestBase
 		// Arrange
 		var mockJs = CreateMockJSRuntime();
 		var service = new PDWebGpuService(mockJs.Object);
-		var buffer = new PDWebGpuBuffer(service, 42, BufferType.Vertex, 1024);
+		var buffer = new PDWebGpuBuffer(service, 42, 1024, BufferType.Vertex);
 
 		// Act
 		buffer.Dispose();
@@ -112,7 +112,7 @@ public class ResourceTests : TestBase
 		// Arrange
 		var mockJs = CreateMockJSRuntime();
 		var service = new PDWebGpuService(mockJs.Object);
-		var buffer = new PDWebGpuBuffer(service, 42, BufferType.Vertex, 1024);
+		var buffer = new PDWebGpuBuffer(service, 42, 1024, BufferType.Vertex);
 
 		// Act
 		await buffer.DisposeAsync();

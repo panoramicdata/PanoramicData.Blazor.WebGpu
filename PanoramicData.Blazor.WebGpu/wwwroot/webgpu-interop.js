@@ -87,45 +87,51 @@ class WebGpuInterop {
         const info = {
             isSupported: this.isSupported(),
             userAgent: navigator.userAgent || '',
-            vendor: navigator.vendor || '',
-            platform: navigator.platform || '',
+            vendor: '', // Will be populated from userAgent
+            platform: navigator.userAgentData?.platform || this.getPlatformFromUserAgent(),
             errorMessage: null,
             browserName: null,
             browserVersion: null,
             supportsWithFlags: false
         };
 
-        // Detect browser
+        // Detect browser and vendor from userAgent
         const ua = navigator.userAgent.toLowerCase();
         if (ua.includes('chrome') && !ua.includes('edge')) {
             info.browserName = 'Chrome';
+            info.vendor = 'Google Inc.';
             const match = ua.match(/chrome\/(\d+)/);
             info.browserVersion = match ? match[1] : 'unknown';
             info.supportsWithFlags = parseInt(info.browserVersion) >= 113;
         } else if (ua.includes('edg/')) {
             info.browserName = 'Edge';
+            info.vendor = 'Microsoft Corporation';
             const match = ua.match(/edg\/(\d+)/);
             info.browserVersion = match ? match[1] : 'unknown';
             info.supportsWithFlags = parseInt(info.browserVersion) >= 113;
         } else if (ua.includes('opr/') || ua.includes('opera')) {
             info.browserName = 'Opera';
+            info.vendor = 'Opera Software';
             const match = ua.match(/(?:opr|opera)\/(\d+)/);
             info.browserVersion = match ? match[1] : 'unknown';
             info.supportsWithFlags = parseInt(info.browserVersion) >= 99;
         } else if (ua.includes('firefox')) {
             info.browserName = 'Firefox';
+            info.vendor = 'Mozilla';
             const match = ua.match(/firefox\/(\d+)/);
             info.browserVersion = match ? match[1] : 'unknown';
             info.supportsWithFlags = true; // May need flags
             info.errorMessage = 'Firefox requires enabling WebGPU in about:config (dom.webgpu.enabled)';
         } else if (ua.includes('safari') && !ua.includes('chrome')) {
             info.browserName = 'Safari';
+            info.vendor = 'Apple Inc.';
             const match = ua.match(/version\/(\d+)/);
             info.browserVersion = match ? match[1] : 'unknown';
             info.supportsWithFlags = true; // Technology Preview
             info.errorMessage = 'Safari requires Safari Technology Preview with WebGPU enabled in Develop menu';
         } else {
             info.browserName = 'Unknown';
+            info.vendor = 'Unknown';
             info.browserVersion = 'unknown';
         }
 
@@ -138,6 +144,20 @@ class WebGpuInterop {
         }
 
         return info;
+    }
+
+    /**
+     * Get platform information from userAgent as fallback
+     * @returns {string} Platform identifier
+     */
+    getPlatformFromUserAgent() {
+        const ua = navigator.userAgent;
+        if (ua.includes('Win')) return 'Windows';
+        if (ua.includes('Mac')) return 'macOS';
+        if (ua.includes('Linux')) return 'Linux';
+        if (ua.includes('Android')) return 'Android';
+        if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+        return 'Unknown';
     }
 
     /**

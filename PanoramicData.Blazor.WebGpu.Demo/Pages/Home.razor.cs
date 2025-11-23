@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
+using PanoramicData.Blazor.WebGpu.Camera;
 using PanoramicData.Blazor.WebGpu.Components;
-using PanoramicData.Blazor.WebGpu.Cameras;
-using PanoramicData.Blazor.WebGpu.Events;
+using PanoramicData.Blazor.WebGpu.Demo.Shaders;
 using PanoramicData.Blazor.WebGpu.Performance;
 using PanoramicData.Blazor.WebGpu.Services;
-using PanoramicData.Blazor.WebGpu.Demo.Shaders;
 
 namespace PanoramicData.Blazor.WebGpu.Demo.Pages;
 
@@ -29,7 +28,7 @@ public partial class Home : IDisposable
 	private CameraMode _cameraMode = CameraMode.Orbit;
 
 	private readonly Dictionary<string, string> _exampleShaders = ExampleShaders.GetAllShaders();
-	
+
 	private readonly PDWebGpuPerformanceDisplayOptions _performanceOptions = new()
 	{
 		ShowFPS = true,
@@ -110,9 +109,9 @@ public partial class Home : IDisposable
 
 		try
 		{
-			// Validate shader
+			// Validate shader first
 			var validation = Resources.PDWebGpuShader.Validate(_currentShaderCode);
-			if (!validation.IsValid)
+			if (!validation.Success)
 			{
 				_compilationError = validation.ErrorMessage ?? "Unknown validation error";
 				return;
@@ -143,9 +142,9 @@ public partial class Home : IDisposable
 	private void LoadExampleShader(ChangeEventArgs args)
 	{
 		var selectedExample = args.Value?.ToString();
-		if (!string.IsNullOrEmpty(selectedExample) && _exampleShaders.ContainsKey(selectedExample))
+		if (!string.IsNullOrEmpty(selectedExample) && _exampleShaders.TryGetValue(selectedExample, out var value))
 		{
-			_currentShaderCode = _exampleShaders[selectedExample];
+			_currentShaderCode = value;
 		}
 	}
 
@@ -161,16 +160,15 @@ public partial class Home : IDisposable
 		};
 
 		// Update aspect ratio for all cameras
-		if (_container?.Canvas != null)
+		// Canvas dimensions will be handled by the component itself
+		// For now, use a default aspect ratio
+		var aspectRatio = 16f / 9f; // Default aspect ratio
+		if (_orbitCamera != null) _orbitCamera.AspectRatio = aspectRatio;
+		if (_firstPersonCamera != null) _firstPersonCamera.AspectRatio = aspectRatio;
+		if (_orthoCamera != null)
 		{
-			var aspectRatio = (float)_container.Canvas.Width / _container.Canvas.Height;
-			if (_orbitCamera != null) _orbitCamera.AspectRatio = aspectRatio;
-			if (_firstPersonCamera != null) _firstPersonCamera.AspectRatio = aspectRatio;
-			if (_orthoCamera != null)
-			{
-				_orthoCamera.Left = -2.0f * aspectRatio;
-				_orthoCamera.Right = 2.0f * aspectRatio;
-			}
+			_orthoCamera.Left = -2.0f * aspectRatio;
+			_orthoCamera.Right = 2.0f * aspectRatio;
 		}
 	}
 

@@ -55,7 +55,7 @@ public class PDWebGpuComponentBaseTests : TestBase
 		var component = new TestComponent();
 		var attributes = new Dictionary<string, object>
 		{
-			["data-test"] = "value"
+			["data-test"] = "DepthClipControlArray"
 		};
 
 		// Act

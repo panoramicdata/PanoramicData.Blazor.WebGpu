@@ -202,11 +202,134 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 	/// Creates a shader module from WGSL source code and returns a wrapper object.
 	/// </summary>
 	/// <param name="wgslCode">The WGSL shader source code.</param>
+	/// <param name="name">Optional name for the shader for debugging purposes.</param>
 	/// <returns>A PDWebGpuShader instance.</returns>
-	public async Task<PDWebGpuShader> CreateShaderAsync(string wgslCode)
+	public async Task<PDWebGpuShader> CreateShaderAsync(string wgslCode, string? name = null)
 	{
 		var resourceId = await CreateShaderModuleAsync(wgslCode);
-		return new PDWebGpuShader(this, resourceId, wgslCode);
+		return new PDWebGpuShader(this, resourceId, wgslCode, name);
+	}
+
+	/// <inheritdoc/>
+	public async Task<PDWebGpuBuffer> CreateBufferAsync(byte[] data, BufferType bufferType, string? name = null)
+	{
+		if (data == null || data.Length == 0)
+		{
+			throw new ArgumentException("Buffer data cannot be null or empty", nameof(data));
+		}
+
+		await EnsureInitializedAsync();
+
+		try
+		{
+			// TODO: Implement JavaScript interop for buffer creation
+			// For now, create a placeholder resource ID
+			var resourceId = await Task.FromResult(0); // Placeholder
+			return new PDWebGpuBuffer(this, resourceId, data.Length, bufferType, name);
+		}
+		catch (Exception ex)
+		{
+			OnError(new PDWebGpuErrorEventArgs(ex));
+			throw new PDWebGpuException($"Failed to create {bufferType} buffer", ex);
+		}
+	}
+
+	/// <inheritdoc/>
+	public async Task<PDWebGpuBuffer> CreateBufferAsync(float[] data, BufferType bufferType, string? name = null)
+	{
+		if (data == null || data.Length == 0)
+		{
+			throw new ArgumentException("Buffer data cannot be null or empty", nameof(data));
+		}
+
+		// Convert float[] to byte[]
+		var bytes = new byte[data.Length * sizeof(float)];
+		Buffer.BlockCopy(data, 0, bytes, 0, bytes.Length);
+
+		return await CreateBufferAsync(bytes, bufferType, name);
+	}
+
+	/// <inheritdoc/>
+	public async Task<PDWebGpuBuffer> CreateBufferAsync(ushort[] data, BufferType bufferType, string? name = null)
+	{
+		if (data == null || data.Length == 0)
+		{
+			throw new ArgumentException("Buffer data cannot be null or empty", nameof(data));
+		}
+
+		// Convert ushort[] to byte[]
+		var bytes = new byte[data.Length * sizeof(ushort)];
+		Buffer.BlockCopy(data, 0, bytes, 0, bytes.Length);
+
+		return await CreateBufferAsync(bytes, bufferType, name);
+	}
+
+	/// <inheritdoc/>
+	public async Task<PDWebGpuCommandEncoder> CreateCommandEncoderAsync(string? name = null)
+	{
+		await EnsureInitializedAsync();
+
+		try
+		{
+			// TODO: Implement JavaScript interop for command encoder creation
+			// For now, create a placeholder resource ID
+			var resourceId = await Task.FromResult(0); // Placeholder
+			return new PDWebGpuCommandEncoder(this, resourceId);
+		}
+		catch (Exception ex)
+		{
+			OnError(new PDWebGpuErrorEventArgs(ex));
+			throw new PDWebGpuException("Failed to create command encoder", ex);
+		}
+	}
+
+	/// <inheritdoc/>
+	public async Task<PDWebGpuPipeline> CreateRenderPipelineAsync(RenderPipelineDescriptor descriptor, string? name = null)
+	{
+		if (descriptor == null)
+		{
+			throw new ArgumentNullException(nameof(descriptor));
+		}
+
+		await EnsureInitializedAsync();
+
+		try
+		{
+			// TODO: Implement JavaScript interop for render pipeline creation
+			// This requires serializing the descriptor to a format JavaScript can understand
+			// For now, create a placeholder resource ID
+			var resourceId = await Task.FromResult(0); // Placeholder
+			return new PDWebGpuPipeline(this, resourceId, PipelineType.Render, name);
+		}
+		catch (Exception ex)
+		{
+			OnError(new PDWebGpuErrorEventArgs(ex));
+			throw new PDWebGpuException("Failed to create render pipeline", ex);
+		}
+	}
+
+	/// <inheritdoc/>
+	public async Task<PDWebGpuBindGroup> CreateBindGroupAsync(BindGroupDescriptor descriptor, string? name = null)
+	{
+		if (descriptor == null)
+		{
+			throw new ArgumentNullException(nameof(descriptor));
+		}
+
+		await EnsureInitializedAsync();
+
+		try
+		{
+			// TODO: Implement JavaScript interop for bind group creation
+			// For now, create a placeholder resource ID
+			var resourceId = await Task.FromResult(0); // Placeholder
+			return new PDWebGpuBindGroup(this, resourceId, name);
+		}
+		catch (Exception ex)
+		{
+			OnError(new PDWebGpuErrorEventArgs(ex));
+			throw new PDWebGpuException("Failed to create bind group", ex);
+		}
 	}
 
 	/// <inheritdoc/>

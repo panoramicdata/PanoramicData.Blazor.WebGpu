@@ -46,12 +46,14 @@ public class PDWebGpuShader : IAsyncDisposable, IDisposable
 	/// <param name="service">The WebGPU service.</param>
 	/// <param name="resourceId">The resource ID from JavaScript.</param>
 	/// <param name="wgslCode">The WGSL shader source code.</param>
+	/// <param name="name">Optional name for debugging purposes.</param>
 	/// <param name="compilationInfo">Optional compilation information.</param>
-	internal PDWebGpuShader(Services.IPDWebGpuService service, int resourceId, string wgslCode, ShaderCompilationInfo? compilationInfo = null)
+	internal PDWebGpuShader(Services.IPDWebGpuService service, int resourceId, string wgslCode, string? name = null, ShaderCompilationInfo? compilationInfo = null)
 	{
 		_service = service ?? throw new ArgumentNullException(nameof(service));
 		_resourceId = resourceId;
 		WgslCode = wgslCode ?? throw new ArgumentNullException(nameof(wgslCode));
+		Name = name;
 		CompilationInfo = compilationInfo ?? new ShaderCompilationInfo { Success = true };
 	}
 
@@ -59,6 +61,11 @@ public class PDWebGpuShader : IAsyncDisposable, IDisposable
 	/// Gets the WGSL shader source code.
 	/// </summary>
 	public string WgslCode { get; }
+
+	/// <summary>
+	/// Gets the optional shader name for debugging.
+	/// </summary>
+	public string? Name { get; }
 
 	/// <summary>
 	/// Gets the compilation information.

@@ -14,16 +14,23 @@ public class PDWebGpuBindGroup : IAsyncDisposable, IDisposable
 	/// </summary>
 	/// <param name="service">The WebGPU service.</param>
 	/// <param name="resourceId">The resource ID from JavaScript.</param>
-	internal PDWebGpuBindGroup(Services.IPDWebGpuService service, int resourceId)
+	/// <param name="name">Optional name for debugging purposes.</param>
+	internal PDWebGpuBindGroup(Services.IPDWebGpuService service, int resourceId, string? name = null)
 	{
 		_service = service ?? throw new ArgumentNullException(nameof(service));
 		_resourceId = resourceId;
+		Name = name;
 	}
 
 	/// <summary>
 	/// Gets the resource ID.
 	/// </summary>
 	public int ResourceId => _resourceId;
+
+	/// <summary>
+	/// Gets the optional bind group name for debugging.
+	/// </summary>
+	public string? Name { get; }
 
 	/// <summary>
 	/// Gets whether the bind group has been disposed.

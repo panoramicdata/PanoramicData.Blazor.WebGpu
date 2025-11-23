@@ -31,17 +31,24 @@ public class PDWebGpuPipeline : IAsyncDisposable, IDisposable
 	/// <param name="service">The WebGPU service.</param>
 	/// <param name="resourceId">The resource ID from JavaScript.</param>
 	/// <param name="pipelineType">The type of pipeline.</param>
-	internal PDWebGpuPipeline(Services.IPDWebGpuService service, int resourceId, PipelineType pipelineType)
+	/// <param name="name">Optional name for debugging purposes.</param>
+	internal PDWebGpuPipeline(Services.IPDWebGpuService service, int resourceId, PipelineType pipelineType, string? name = null)
 	{
 		_service = service ?? throw new ArgumentNullException(nameof(service));
 		_resourceId = resourceId;
 		PipelineType = pipelineType;
+		Name = name;
 	}
 
 	/// <summary>
 	/// Gets the pipeline type.
 	/// </summary>
 	public PipelineType PipelineType { get; }
+
+	/// <summary>
+	/// Gets the optional pipeline name for debugging.
+	/// </summary>
+	public string? Name { get; }
 
 	/// <summary>
 	/// Gets the resource ID.

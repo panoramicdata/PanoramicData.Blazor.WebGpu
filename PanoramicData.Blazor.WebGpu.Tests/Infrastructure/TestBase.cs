@@ -8,6 +8,8 @@ public abstract class TestBase : IDisposable
 {
 	private bool _disposed;
 
+	protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
 	protected TestBase()
 	{
 		// Common setup for all tests
