@@ -11,6 +11,7 @@ namespace PanoramicData.Blazor.WebGpu.Components;
 public partial class PDWebGpuContainer : PDWebGpuComponentBase, IVisibilityCallback
 {
 	private PDWebGpuCanvas? _canvas;
+	private PDWebGpuPerformanceDisplay? _performanceDisplay;
 	private bool _isRunning;
 	private bool _isPaused;
 	private bool _isPageVisible = true;
@@ -77,6 +78,33 @@ public partial class PDWebGpuContainer : PDWebGpuComponentBase, IVisibilityCallb
 	/// Gets the current frames per second.
 	/// </summary>
 	public double CurrentFPS => _lastFrameTime > 0 && _frameNumber > 0 ? 1000.0 / (_totalTime / _frameNumber) : 0;
+
+	/// <summary>
+	/// Gets the WebGPU canvas reference.
+	/// </summary>
+	public PDWebGpuCanvas? Canvas => _canvas;
+
+	/// <summary>
+	/// Gets the performance display reference (if registered).
+	/// </summary>
+	public PDWebGpuPerformanceDisplay? PerformanceDisplay => _performanceDisplay;
+
+	/// <summary>
+	/// Registers a performance display component for automatic updates.
+	/// </summary>
+	/// <param name="performanceDisplay">The performance display component.</param>
+	public void RegisterPerformanceDisplay(PDWebGpuPerformanceDisplay performanceDisplay)
+	{
+		_performanceDisplay = performanceDisplay;
+	}
+
+	/// <summary>
+	/// Unregisters the performance display component.
+	/// </summary>
+	public void UnregisterPerformanceDisplay()
+	{
+		_performanceDisplay = null;
+	}
 
 	/// <inheritdoc/>
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -224,6 +252,9 @@ public partial class PDWebGpuContainer : PDWebGpuComponentBase, IVisibilityCallb
 				TotalTime = _totalTime,
 				FrameNumber = ++_frameNumber
 			};
+
+			// Update performance display if registered
+			_performanceDisplay?.RecordFrame(deltaTime);
 
 			await RaiseFrameAsync(frameArgs);
 		}

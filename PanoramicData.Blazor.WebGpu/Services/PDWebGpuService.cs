@@ -222,9 +222,18 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 
 		try
 		{
-			// TODO: Implement JavaScript interop for buffer creation
-			// For now, create a placeholder resource ID
-			var resourceId = await Task.FromResult(0); // Placeholder
+			// Map buffer type to WebGPU usage flags
+			// GPUBufferUsage values: VERTEX = 0x20, INDEX = 0x10, UNIFORM = 0x40, STORAGE = 0x80, COPY_DST = 0x8
+			int usage = bufferType switch
+			{
+				BufferType.Vertex => 0x20,  // GPUBufferUsage.VERTEX
+				BufferType.Index => 0x10,   // GPUBufferUsage.INDEX
+				BufferType.Uniform => 0x40, // GPUBufferUsage.UNIFORM
+				BufferType.Storage => 0x80, // GPUBufferUsage.STORAGE
+				_ => throw new ArgumentException($"Unsupported buffer type: {bufferType}", nameof(bufferType))
+			};
+
+			var resourceId = await _interop.CreateBufferAsync(data, usage, name);
 			return new PDWebGpuBuffer(this, resourceId, data.Length, bufferType, name);
 		}
 		catch (Exception ex)
@@ -271,10 +280,8 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 
 		try
 		{
-			// TODO: Implement JavaScript interop for command encoder creation
-			// For now, create a placeholder resource ID
-			var resourceId = await Task.FromResult(0); // Placeholder
-			return new PDWebGpuCommandEncoder(this, resourceId);
+			var resourceId = await _interop.CreateCommandEncoderAsync(name);
+			return new PDWebGpuCommandEncoder(this, resourceId, _interop);
 		}
 		catch (Exception ex)
 		{
@@ -295,10 +302,9 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 
 		try
 		{
-			// TODO: Implement JavaScript interop for render pipeline creation
-			// This requires serializing the descriptor to a format JavaScript can understand
-			// For now, create a placeholder resource ID
-			var resourceId = await Task.FromResult(0); // Placeholder
+			// Convert descriptor to JavaScript-compatible format
+			var jsDescriptor = ConvertRenderPipelineDescriptor(descriptor, name);
+			var resourceId = await _interop.CreateRenderPipelineAsync(jsDescriptor);
 			return new PDWebGpuPipeline(this, resourceId, PipelineType.Render, name);
 		}
 		catch (Exception ex)
@@ -320,9 +326,9 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 
 		try
 		{
-			// TODO: Implement JavaScript interop for bind group creation
-			// For now, create a placeholder resource ID
-			var resourceId = await Task.FromResult(0); // Placeholder
+			// Convert descriptor to JavaScript-compatible format
+			var jsDescriptor = ConvertBindGroupDescriptor(descriptor, name);
+			var resourceId = await _interop.CreateBindGroupAsync(jsDescriptor);
 			return new PDWebGpuBindGroup(this, resourceId, name);
 		}
 		catch (Exception ex)
@@ -364,6 +370,52 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 		{
 			OnError(new PDWebGpuErrorEventArgs(ex));
 			// Don't throw during resource cleanup
+		}
+	}
+
+	/// <summary>
+	/// Gets the current texture from a canvas context.
+	/// </summary>
+	/// <param name="contextId">The canvas context ID.</param>
+	/// <returns>Resource ID for the texture.</returns>
+	public async Task<int> GetCurrentTextureAsync(string contextId)
+	{
+		if (string.IsNullOrWhiteSpace(contextId))
+		{
+			throw new ArgumentException("Context ID cannot be null or empty", nameof(contextId));
+		}
+
+		await EnsureInitializedAsync();
+
+		try
+		{
+			return await _interop.GetCurrentTextureAsync(contextId);
+		}
+		catch (Exception ex)
+		{
+			OnError(new PDWebGpuErrorEventArgs(ex));
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Creates a texture view from a texture.
+	/// </summary>
+	/// <param name="textureId">The texture resource ID.</param>
+	/// <param name="descriptor">Optional view descriptor.</param>
+	/// <returns>Resource ID for the texture view.</returns>
+	public async Task<int> CreateTextureViewAsync(int textureId, object? descriptor = null)
+	{
+		await EnsureInitializedAsync();
+
+		try
+		{
+			return await _interop.CreateTextureViewAsync(textureId, descriptor);
+		}
+		catch (Exception ex)
+		{
+			OnError(new PDWebGpuErrorEventArgs(ex));
+			throw;
 		}
 	}
 
@@ -430,5 +482,147 @@ public class PDWebGpuService : IPDWebGpuService, IDisposable
 		}
 
 		DisposeAsync().AsTask().GetAwaiter().GetResult();
+	}
+
+	private static object ConvertRenderPipelineDescriptor(RenderPipelineDescriptor descriptor, string? name)
+	{
+		var result = new Dictionary<string, object?>
+		{
+			["label"] = name
+		};
+
+		// Vertex state
+		if (descriptor.Vertex != null)
+		{
+			result["vertex"] = new
+			{
+				shaderModuleId = descriptor.Vertex.Shader?.ResourceId,
+				entryPoint = descriptor.Vertex.EntryPoint ?? "main",
+				buffers = descriptor.Vertex.Buffers?.Select(b => new
+				{
+					arrayStride = b.ArrayStride,
+					stepMode = b.StepMode,
+					attributes = b.Attributes?.Select(a => new
+					{
+						format = a.Format,
+						offset = a.Offset,
+						shaderLocation = a.ShaderLocation
+					}).ToArray()
+				}).ToArray()
+			};
+		}
+
+		// Fragment state
+		if (descriptor.Fragment != null)
+		{
+			result["fragment"] = new
+			{
+				shaderModuleId = descriptor.Fragment.Shader?.ResourceId,
+				entryPoint = descriptor.Fragment.EntryPoint ?? "main",
+				targets = descriptor.Fragment.Targets?.Select(t =>
+				{
+					var target = new Dictionary<string, object>
+					{
+						["format"] = t.Format,
+						["writeMask"] = t.WriteMask
+					};
+
+					// Only include blend if it's not null
+					if (t.Blend != null)
+					{
+						target["blend"] = new
+						{
+							color = t.Blend.Color != null ? new
+							{
+								srcFactor = t.Blend.Color.SrcFactor,
+								dstFactor = t.Blend.Color.DstFactor,
+								operation = t.Blend.Color.Operation
+							} : null,
+							alpha = t.Blend.Alpha != null ? new
+							{
+								srcFactor = t.Blend.Alpha.SrcFactor,
+								dstFactor = t.Blend.Alpha.DstFactor,
+								operation = t.Blend.Alpha.Operation
+							} : null
+						};
+					}
+
+					return target;
+				}).ToArray()
+			};
+		}
+
+		// Primitive state
+		if (descriptor.Primitive != null)
+		{
+			var primitive = new Dictionary<string, object>
+			{
+				["topology"] = descriptor.Primitive.Topology
+			};
+
+			// Only include optional properties if they have values
+			if (!string.IsNullOrEmpty(descriptor.Primitive.StripIndexFormat))
+			{
+				primitive["stripIndexFormat"] = descriptor.Primitive.StripIndexFormat;
+			}
+			if (!string.IsNullOrEmpty(descriptor.Primitive.FrontFace))
+			{
+				primitive["frontFace"] = descriptor.Primitive.FrontFace;
+			}
+			if (!string.IsNullOrEmpty(descriptor.Primitive.CullMode))
+			{
+				primitive["cullMode"] = descriptor.Primitive.CullMode;
+			}
+
+			result["primitive"] = primitive;
+		}
+
+		// Depth/stencil state
+		if (descriptor.DepthStencil != null)
+		{
+			result["depthStencil"] = new
+			{
+				format = descriptor.DepthStencil.Format,
+				depthWriteEnabled = descriptor.DepthStencil.DepthWriteEnabled,
+				depthCompare = descriptor.DepthStencil.DepthCompare,
+				stencilFront = descriptor.DepthStencil.StencilFront,
+				stencilBack = descriptor.DepthStencil.StencilBack,
+				stencilReadMask = descriptor.DepthStencil.StencilReadMask,
+				stencilWriteMask = descriptor.DepthStencil.StencilWriteMask,
+				depthBias = descriptor.DepthStencil.DepthBias,
+				depthBiasSlopeScale = descriptor.DepthStencil.DepthBiasSlopeScale,
+				depthBiasClamp = descriptor.DepthStencil.DepthBiasClamp
+			};
+		}
+
+		// Multisample state
+		if (descriptor.Multisample != null)
+		{
+			result["multisample"] = new
+			{
+				count = descriptor.Multisample.Count,
+				mask = descriptor.Multisample.Mask,
+				alphaToCoverageEnabled = descriptor.Multisample.AlphaToCoverageEnabled
+			};
+		}
+
+		return result;
+	}
+
+	private static object ConvertBindGroupDescriptor(BindGroupDescriptor descriptor, string? name)
+	{
+		return new
+		{
+			label = name,
+			layoutId = descriptor.LayoutId,
+			pipelineId = descriptor.PipelineId,
+			groupIndex = descriptor.GroupIndex,
+			entries = descriptor.Entries?.Select(e => new
+			{
+				binding = e.Binding,
+				resourceId = e.ResourceId,
+				resourceType = e.ResourceType
+			}).ToArray()
+		};
 	}
 }

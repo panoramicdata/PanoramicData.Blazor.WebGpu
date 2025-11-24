@@ -1,5 +1,5 @@
 @page "/"
-@inject IPDWebGpuService WebGpuService
+@inject IJSRuntime JSRuntime
 @implements IDisposable
 
 <PageTitle>WebGPU Shader Editor - Demo</PageTitle>
@@ -8,6 +8,10 @@
 	<div class="toolbar">
 		<h1>WebGPU Shader Editor Demo</h1>
 		<div class="toolbar-actions">
+			<select class="form-select" @bind="_currentShaderType" style="width: auto; display: inline-block;">
+				<option value="@ShaderType.Vertex">Vertex Shader</option>
+				<option value="@ShaderType.Fragment">Fragment Shader</option>
+			</select>
 			<button class="btn btn-primary" @onclick="CompileShader">
 				<span class="oi oi-flash"></span> Compile Shader
 			</button>
@@ -88,6 +92,8 @@
 				else
 				{
 					<PDWebGpuContainer @ref="_container"
+									   CanvasId="webgpu-demo-canvas"
+									   AutoStart="true"
 									   FrameRateMode="FrameRateMode.Fixed"
 									   TargetFrameRate="60"
 									   PauseWhenInactive="true"
@@ -110,6 +116,25 @@
 									<br />
 									<span>View Matrix: Calculated</span>
 								}
+								@if (_activeCamera is PDWebGpuOrbitCamera orbitDebugCam)
+								{
+									<br />
+									<span style="color: yellow;">DEBUG Distance: @orbitDebugCam.Distance</span>
+									<br />
+									<span style="color: yellow;">DEBUG FOV: @((orbitDebugCam.FieldOfView * 180 / MathF.PI).ToString("F1"))°</span>
+									<br />
+									<span style="color: yellow;">DEBUG Position: @orbitDebugCam.Position.ToString("F2")</span>
+									<br />
+									<span style="color: yellow;">DEBUG Aspect: @orbitDebugCam.AspectRatio.ToString("F2")</span>
+									<br />
+									<span style="color: yellow;">DEBUG Proj M11: @orbitDebugCam.ProjectionMatrix.M11.ToString("F4")</span>
+									<br />
+									<span style="color: yellow;">DEBUG Proj M22: @orbitDebugCam.ProjectionMatrix.M22.ToString("F4")</span>
+									<br />
+									<span style="color: yellow;">DEBUG Near: @orbitDebugCam.NearPlane.ToString("F2")</span>
+									<br />
+									<span style="color: yellow;">DEBUG Far: @orbitDebugCam.FarPlane.ToString("F1")</span>
+								}
 							</div>
 						</div>
 					</PDWebGpuContainer>
@@ -121,8 +146,9 @@
 	<div class="info-panel">
 		<h3>Instructions</h3>
 		<ul>
+			<li><strong>Hot-Reload Shaders:</strong> Select shader type (Vertex/Fragment), edit code, and click "Compile Shader"</li>
 			<li>Edit WGSL shader code in the left pane</li>
-			<li>Click "Compile Shader" to compile and apply changes</li>
+			<li>Click "Compile Shader" to compile and <strong>immediately apply changes</strong></li>
 			<li>Select example shaders from the dropdown to learn WGSL syntax</li>
 			<li>Toggle performance metrics to monitor FPS and frame timing</li>
 			<li>Switch between camera modes to explore different viewing perspectives</li>

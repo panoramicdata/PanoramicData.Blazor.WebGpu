@@ -190,6 +190,18 @@ public class PDWebGpuFirstPersonCamera : PDWebGpuCameraBase
 	/// <inheritdoc/>
 	protected override Matrix4x4 CalculateProjectionMatrix()
 	{
-		return Matrix4x4.CreatePerspectiveFieldOfView(_fieldOfView, AspectRatio, NearPlane, FarPlane);
+		// WebGPU uses NDC with Y-down and depth [0,1]
+		// Standard perspective projection matrix
+		
+		float f = 1.0f / MathF.Tan(_fieldOfView / 2.0f);
+		float rangeInv = 1.0f / (NearPlane - FarPlane);
+
+		// Row-major perspective matrix for WebGPU (will be transposed before upload)
+		return new Matrix4x4(
+			f / AspectRatio, 0, 0, 0,                          // Row 0
+			0, f, 0, 0,                                         // Row 1 (positive, not negative!)
+			0, 0, FarPlane * rangeInv, NearPlane * FarPlane * rangeInv,  // Row 2 (depth [0,1])
+			0, 0, -1, 0                                         // Row 3
+		);
 	}
 }

@@ -100,8 +100,21 @@ public class PDWebGpuBuffer : IAsyncDisposable, IDisposable
 			throw new ArgumentOutOfRangeException(nameof(offset), "Offset and data length exceed buffer size");
 		}
 
-		// TODO: Implement JavaScript interop for buffer update
-		await Task.CompletedTask; // Placeholder
+		// Get the interop through reflection (not ideal but works for now)
+		// In a real implementation, we'd want to add a WriteBufferAsync method to IPDWebGpuService
+		var serviceType = _service.GetType();
+		var interopField = serviceType.GetField("_interop", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		if (interopField != null)
+		{
+			var interop = (Interop.WebGpuJsInterop?)interopField.GetValue(_service);
+			if (interop != null)
+			{
+				await interop.WriteBufferAsync(_resourceId, data, offset);
+				return;
+			}
+		}
+
+		throw new InvalidOperationException("Unable to access WebGPU interop for buffer update");
 	}
 
 	/// <summary>

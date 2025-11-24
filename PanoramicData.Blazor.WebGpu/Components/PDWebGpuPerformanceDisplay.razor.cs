@@ -12,6 +12,9 @@ public partial class PDWebGpuPerformanceDisplay : PDWebGpuComponentBase
 	private System.Threading.Timer? _updateTimer;
 	private double _targetFrameTime;
 
+	[CascadingParameter]
+	private PDWebGpuContainer? Container { get; set; }
+
 	/// <summary>
 	/// Gets or sets the performance display options.
 	/// </summary>
@@ -33,6 +36,9 @@ public partial class PDWebGpuPerformanceDisplay : PDWebGpuComponentBase
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
+
+		// Register with container for automatic updates
+		Container?.RegisterPerformanceDisplay(this);
 
 		// Calculate target frame time
 		_targetFrameTime = TargetFrameRate > 0 ? 1000.0 / TargetFrameRate : 0;
@@ -136,6 +142,9 @@ public partial class PDWebGpuPerformanceDisplay : PDWebGpuComponentBase
 	/// <inheritdoc/>
 	protected override async ValueTask DisposeAsyncCore()
 	{
+		// Unregister from container
+		Container?.UnregisterPerformanceDisplay();
+
 		_updateTimer?.Dispose();
 		await base.DisposeAsyncCore();
 	}

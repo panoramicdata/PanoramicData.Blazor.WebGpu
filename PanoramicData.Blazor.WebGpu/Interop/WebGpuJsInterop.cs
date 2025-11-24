@@ -158,6 +158,25 @@ internal sealed class WebGpuJsInterop : IAsyncDisposable
 	}
 
 	/// <summary>
+	/// Creates a texture view from a texture.
+	/// </summary>
+	/// <param name="textureId">The texture resource ID.</param>
+	/// <param name="descriptor">Optional view descriptor.</param>
+	/// <returns>Resource ID for the texture view.</returns>
+	public async ValueTask<int> CreateTextureViewAsync(int textureId, object? descriptor = null)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("createTextureView", textureId, descriptor);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to create texture view", ex);
+		}
+	}
+
+	/// <summary>
 	/// Creates a shader module from WGSL source code.
 	/// </summary>
 	/// <param name="wgslCode">The WGSL shader source code.</param>
@@ -258,6 +277,316 @@ internal sealed class WebGpuJsInterop : IAsyncDisposable
 		catch (Exception ex)
 		{
 			throw new PDWebGpuException("Failed to check page visibility", ex);
+		}
+	}
+
+	/// <summary>
+	/// Creates a buffer with initial data.
+	/// </summary>
+	/// <param name="data">The buffer data.</param>
+	/// <param name="usage">Buffer usage flags.</param>
+	/// <param name="label">Optional label for debugging.</param>
+	/// <returns>Resource ID for the buffer.</returns>
+	public async ValueTask<int> CreateBufferAsync(byte[] data, int usage, string? label = null)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("createBuffer", data, usage, label);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to create buffer", ex);
+		}
+	}
+
+	/// <summary>
+	/// Writes data to an existing buffer.
+	/// </summary>
+	/// <param name="bufferId">The buffer resource ID.</param>
+	/// <param name="data">The data to write.</param>
+	/// <param name="offset">Offset in bytes.</param>
+	public async ValueTask WriteBufferAsync(int bufferId, byte[] data, long offset = 0)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("writeBuffer", bufferId, data, offset);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to write buffer", ex);
+		}
+	}
+
+	/// <summary>
+	/// Creates a render pipeline.
+	/// </summary>
+	/// <param name="descriptor">Pipeline descriptor.</param>
+	/// <returns>Resource ID for the pipeline.</returns>
+	public async ValueTask<int> CreateRenderPipelineAsync(object descriptor)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("createRenderPipeline", descriptor);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to create render pipeline", ex);
+		}
+	}
+
+	/// <summary>
+	/// Creates a bind group.
+	/// </summary>
+	/// <param name="descriptor">Bind group descriptor.</param>
+	/// <returns>Resource ID for the bind group.</returns>
+	public async ValueTask<int> CreateBindGroupAsync(object descriptor)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("createBindGroup", descriptor);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to create bind group", ex);
+		}
+	}
+
+	/// <summary>
+	/// Creates a command encoder.
+	/// </summary>
+	/// <param name="label">Optional label for debugging.</param>
+	/// <returns>Resource ID for the command encoder.</returns>
+	public async ValueTask<int> CreateCommandEncoderAsync(string? label = null)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("createCommandEncoder", label);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to create command encoder", ex);
+		}
+	}
+
+	/// <summary>
+	/// Begins a render pass.
+	/// </summary>
+	/// <param name="encoderId">Command encoder resource ID.</param>
+	/// <param name="descriptor">Render pass descriptor.</param>
+	/// <returns>Resource ID for the render pass encoder.</returns>
+	public async ValueTask<int> BeginRenderPassAsync(int encoderId, object descriptor)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("beginRenderPass", encoderId, descriptor);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to begin render pass", ex);
+		}
+	}
+
+	/// <summary>
+	/// Sets the pipeline for a render pass.
+	/// </summary>
+	/// <param name="passEncoderId">Render pass encoder resource ID.</param>
+	/// <param name="pipelineId">Pipeline resource ID.</param>
+	public async ValueTask SetPipelineAsync(int passEncoderId, int pipelineId)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("setPipeline", passEncoderId, pipelineId);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to set pipeline", ex);
+		}
+	}
+
+	/// <summary>
+	/// Sets a bind group for a render pass.
+	/// </summary>
+	/// <param name="passEncoderId">Render pass encoder resource ID.</param>
+	/// <param name="index">Bind group index.</param>
+	/// <param name="bindGroupId">Bind group resource ID.</param>
+	public async ValueTask SetBindGroupAsync(int passEncoderId, int index, int bindGroupId)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("setBindGroup", passEncoderId, index, bindGroupId);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to set bind group", ex);
+		}
+	}
+
+	/// <summary>
+	/// Sets a vertex buffer for a render pass.
+	/// </summary>
+	/// <param name="passEncoderId">Render pass encoder resource ID.</param>
+	/// <param name="slot">Vertex buffer slot.</param>
+	/// <param name="bufferId">Buffer resource ID.</param>
+	public async ValueTask SetVertexBufferAsync(int passEncoderId, int slot, int bufferId)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("setVertexBuffer", passEncoderId, slot, bufferId);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to set vertex buffer", ex);
+		}
+	}
+
+	/// <summary>
+	/// Sets an index buffer for a render pass.
+	/// </summary>
+	/// <param name="passEncoderId">Render pass encoder resource ID.</param>
+	/// <param name="bufferId">Buffer resource ID.</param>
+	/// <param name="format">Index format ('uint16' or 'uint32').</param>
+	public async ValueTask SetIndexBufferAsync(int passEncoderId, int bufferId, string format)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("setIndexBuffer", passEncoderId, bufferId, format);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to set index buffer", ex);
+		}
+	}
+
+	/// <summary>
+	/// Draws vertices.
+	/// </summary>
+	public async ValueTask DrawAsync(int passEncoderId, int vertexCount, int instanceCount = 1, int firstVertex = 0, int firstInstance = 0)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("draw", passEncoderId, vertexCount, instanceCount, firstVertex, firstInstance);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to draw", ex);
+		}
+	}
+
+	/// <summary>
+	/// Draws indexed vertices.
+	/// </summary>
+	public async ValueTask DrawIndexedAsync(int passEncoderId, int indexCount, int instanceCount = 1, int firstIndex = 0, int baseVertex = 0, int firstInstance = 0)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("drawIndexed", passEncoderId, indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to draw indexed", ex);
+		}
+	}
+
+	/// <summary>
+	/// Ends a render pass.
+	/// </summary>
+	/// <param name="passEncoderId">Render pass encoder resource ID.</param>
+	public async ValueTask EndRenderPassAsync(int passEncoderId)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("endRenderPass", passEncoderId);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to end render pass", ex);
+		}
+	}
+
+	/// <summary>
+	/// Finishes command encoder and returns command buffer.
+	/// </summary>
+	/// <param name="encoderId">Command encoder resource ID.</param>
+	/// <returns>Resource ID for the command buffer.</returns>
+	public async ValueTask<int> FinishCommandEncoderAsync(int encoderId)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<int>("finishCommandEncoder", encoderId);
+		}
+		catch (JSException ex)
+		{
+			throw new PDWebGpuException("Failed to finish command encoder", ex);
+		}
+	}
+
+	/// <summary>
+	/// Gets current error statistics from the JavaScript interop layer.
+	/// </summary>
+	/// <returns>Error statistics including counts and details.</returns>
+	public async ValueTask<WebGpuErrorStatistics> GetErrorStatisticsAsync()
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			return await module.InvokeAsync<WebGpuErrorStatistics>("getErrorStatistics");
+		}
+		catch (Exception ex)
+		{
+			// If we can't get error stats, return empty stats
+			return new WebGpuErrorStatistics
+			{
+				UniqueErrors = 0,
+				TotalErrors = 0,
+				Errors = []
+			};
+		}
+	}
+
+	/// <summary>
+	/// Clears all tracked error statistics.
+	/// </summary>
+	public async ValueTask ClearErrorStatisticsAsync()
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("clearErrorStatistics");
+		}
+		catch
+		{
+			// Ignore errors during cleanup
+		}
+	}
+
+	/// <summary>
+	/// Sets the interval at which error summaries are reported to the console.
+	/// </summary>
+	/// <param name="intervalMs">Interval in milliseconds (minimum 1000ms).</param>
+	public async ValueTask SetErrorReportIntervalAsync(int intervalMs)
+	{
+		try
+		{
+			var module = await _moduleTask.Value;
+			await module.InvokeVoidAsync("setErrorReportInterval", intervalMs);
+		}
+		catch (Exception ex)
+		{
+			throw new PDWebGpuException("Failed to set error report interval", ex);
 		}
 	}
 
@@ -387,4 +716,41 @@ public class AdapterInfo
 	/// Gets or sets the description.
 	/// </summary>
 	public string Description { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// WebGPU error statistics from the JavaScript layer.
+/// </summary>
+public class WebGpuErrorStatistics
+{
+	/// <summary>
+	/// Gets or sets the number of unique error types.
+	/// </summary>
+	public int UniqueErrors { get; set; }
+
+	/// <summary>
+	/// Gets or sets the total number of errors.
+	/// </summary>
+	public int TotalErrors { get; set; }
+
+	/// <summary>
+	/// Gets or sets the list of errors with their counts.
+	/// </summary>
+	public WebGpuErrorEntry[] Errors { get; set; } = [];
+}
+
+/// <summary>
+/// Individual error entry in error statistics.
+/// </summary>
+public class WebGpuErrorEntry
+{
+	/// <summary>
+	/// Gets or sets the error message.
+	/// </summary>
+	public string Message { get; set; } = string.Empty;
+
+	/// <summary>
+	/// Gets or sets the number of times this error occurred.
+	/// </summary>
+	public int Count { get; set; }
 }

@@ -159,6 +159,21 @@ public interface IPDWebGpuService : IAsyncDisposable
 	/// <param name="resourceId">The resource ID to release.</param>
 	/// <returns>A task representing the asynchronous operation.</returns>
 	Task ReleaseResourceAsync(int resourceId);
+
+	/// <summary>
+	/// Gets the current texture from a canvas context.
+	/// </summary>
+	/// <param name="contextId">The canvas context ID.</param>
+	/// <returns>Resource ID for the texture.</returns>
+	Task<int> GetCurrentTextureAsync(string contextId);
+
+	/// <summary>
+	/// Creates a texture view from a texture.
+	/// </summary>
+	/// <param name="textureId">The texture resource ID.</param>
+	/// <param name="descriptor">Optional view descriptor.</param>
+	/// <returns>Resource ID for the texture view.</returns>
+	Task<int> CreateTextureViewAsync(int textureId, object? descriptor = null);
 }
 
 /// <summary>
