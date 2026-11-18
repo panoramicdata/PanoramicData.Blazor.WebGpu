@@ -32,7 +32,7 @@ public enum BufferType
 public class PDWebGpuBuffer : IAsyncDisposable, IDisposable
 {
 	private readonly Services.IPDWebGpuService _service;
-	private int _resourceId;
+	private readonly int _resourceId;
 	private bool _disposed;
 
 	/// <summary>

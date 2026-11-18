@@ -749,8 +749,14 @@ public partial class Home : IDisposable
 
 		// Update aspect ratio for all cameras
 		var aspectRatio = 16f / 9f; // Default aspect ratio
-		if (_orbitCamera != null) _orbitCamera.AspectRatio = aspectRatio;
-		if (_firstPersonCamera != null) _firstPersonCamera.AspectRatio = aspectRatio;
+		if (_orbitCamera != null)
+		{
+			_orbitCamera.AspectRatio = aspectRatio;
+		}
+		if (_firstPersonCamera != null)
+		{
+			_firstPersonCamera.AspectRatio = aspectRatio;
+		}
 		if (_orthoCamera != null)
 		{
 			_orthoCamera.Left = -2.0f * aspectRatio;

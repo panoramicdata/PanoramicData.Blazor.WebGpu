@@ -14,8 +14,8 @@ public class PDWebGpuFirstPersonCamera : PDWebGpuCameraBase
 	private float _fieldOfView = MathF.PI / 4f; // 45 degrees
 	private float _moveSpeed = 5f; // Units per second
 	private float _mouseSensitivity = 0.002f; // Radians per pixel
-	private float _minPitch = -MathF.PI / 2f + 0.01f;
-	private float _maxPitch = MathF.PI / 2f - 0.01f;
+	private readonly float _minPitch = -MathF.PI / 2f + 0.01f;
+	private readonly float _maxPitch = MathF.PI / 2f - 0.01f;
 
 	/// <summary>
 	/// Gets or sets the camera position in world space.
