@@ -15,8 +15,8 @@ public class PDWebGpuOrbitCamera : PDWebGpuCameraBase
 	private float _fieldOfView = MathF.PI / 4f; // 45 degrees
 	private float _minDistance = 1f;
 	private float _maxDistance = 100f;
-	private float _minPitch = -MathF.PI / 2f + 0.01f;
-	private float _maxPitch = MathF.PI / 2f - 0.01f;
+	private readonly float _minPitch = -MathF.PI / 2f + 0.01f;
+	private readonly float _maxPitch = MathF.PI / 2f - 0.01f;
 
 	/// <summary>
 	/// Gets or sets the target point the camera orbits around.

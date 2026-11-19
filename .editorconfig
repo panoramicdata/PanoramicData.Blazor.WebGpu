@@ -375,3 +375,6 @@ csharp_style_prefer_top_level_statements = true:silent
 csharp_style_prefer_primary_constructors = true:suggestion
 csharp_prefer_system_threading_lock = true:suggestion
 dotnet_style_namespace_match_folder = true:suggestion
+
+[*.{js,jsx,ts,tsx,vue,mjs,cjs}]
+end_of_line = lf
