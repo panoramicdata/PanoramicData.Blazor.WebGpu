@@ -551,7 +551,8 @@ class WebGpuInterop {
 			return resourceId;
 		} catch (error) {
 			console.error(
-				`Failed to create buffer ${label || "unnamed"}:`,
+				"Failed to create buffer %s:",
+				label || "unnamed",
 				error,
 			);
 			throw new Error(`Failed to create buffer: ${error.message}`);
@@ -1054,7 +1055,7 @@ class WebGpuInterop {
 
 		// Only log the first occurrence of each error type to console
 		if (currentCount === 0) {
-			console.error(`${message}:`, error);
+			console.error("%s:", message, error);
 		}
 	}
 

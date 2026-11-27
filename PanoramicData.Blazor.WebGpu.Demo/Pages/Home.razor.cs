@@ -335,7 +335,7 @@ public partial class Home : IDisposable
 				// .NET Matrix4x4 is row-major, WGSL mat4x4 is column-major
 				mvpMatrix = Matrix4x4.Transpose(mvpMatrix);
 
-				var matrixBytes = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref mvpMatrix, 1)).ToArray();
+				var matrixBytes = MemoryMarshal.AsBytes(new[] { mvpMatrix }.AsSpan()).ToArray();
 				await _uniformBuffer!.UpdateAsync(matrixBytes);
 			}
 
